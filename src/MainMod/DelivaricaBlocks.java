@@ -17,10 +17,12 @@ import mindustry.type.UnitType;
 import mindustry.world.blocks.power.ThermalGenerator;
 import mindustry.world.draw.DrawMulti;
 import mindustry.world.draw.DrawRegion;
+import mindustry.world.draw.DrawArcSmelt;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.Attribute;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.draw.DrawTurret;
+import mindustry.world.blocks.production.GenericCrafter; // ДОБАВЛЕНО
 
 import mindustry.world.blocks.environment.OreBlock;
 import mindustry.world.blocks.distribution.BufferedItemBridge;
@@ -87,6 +89,9 @@ public class DelivaricaBlocks {
 
     // Энергетика
     public static ThermalGenerator mawTurbine;
+
+    // Производство
+    public static GenericCrafter ramtaniumSmelter; // ДОБАВЛЕНО СЮДА
 
     // Турели
     public static ItemTurret range;
@@ -343,7 +348,8 @@ public class DelivaricaBlocks {
             constructTime = 60f * 10f;
 
             upgrades.addAll(
-                new UnitType[]{DelivaricaUnits.photon, DelivaricaUnits.photonArmored}
+                new UnitType[]{DelivaricaUnits.photon, DelivaricaUnits.photonArmored},
+                new UnitType[]{DelivaricaUnits.bunch, DelivaricaUnits.bunchArmored}
             );
         }};
 
@@ -371,6 +377,25 @@ public class DelivaricaBlocks {
                     rotateSpeed = 4f;
                 }},
                 new DrawRegion("-top")
+            );
+        }};
+
+        // ПРОИЗВОДСТВО
+        ramtaniumSmelter = new GenericCrafter("ramtanium-smelter"){{
+            requirements(Category.crafting, ItemStack.with(DelivaricaItems.chromium, 90, DelivaricaItems.nickel, 75));
+            size = 3;           
+            health = 800;       
+            craftTime = 90f;    
+            hasPower = true;
+            consumePower(1f); 
+            
+            consumeItems(ItemStack.with(DelivaricaItems.nickel, 2, DelivaricaItems.chromium, 1));
+            outputItem = new ItemStack(DelivaricaItems.ramtanium, 1);
+
+            drawer = new DrawMulti(
+                new DrawRegion("-bottom"),
+                new DrawArcSmelt(),
+                new DrawDefault()
             );
         }};
 
@@ -419,8 +444,6 @@ public class DelivaricaBlocks {
             speed = 1f;
             invert = true;
         }};
-
-
 
         // ЖИДКОСТНЫЕ
 
