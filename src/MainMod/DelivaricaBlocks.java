@@ -13,6 +13,10 @@ import mindustry.gen.Sounds;
 import mindustry.type.Category;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
+import mindustry.world.blocks.power.ThermalGenerator;
+import mindustry.world.draw.DrawMulti;
+import mindustry.world.draw.DrawDefault;
+import mindustry.world.draw.DrawBlurSpin; 
 import mindustry.world.meta.Attribute;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.draw.DrawTurret;
@@ -80,6 +84,9 @@ public class DelivaricaBlocks {
     // Жидкостные
     public static LiquidRouter liquiTankOne;
 
+    // Энергетика
+    public static ThermalGenerator mawTurbine;
+
     // Турели
     public static ItemTurret range;
 
@@ -135,6 +142,7 @@ public class DelivaricaBlocks {
             parent = blendGroup = obsidian;
             variants = 2;
             attributes.set(Attribute.steam, 1f);
+            attributes.set(Attribute.heat, 1f);
             mapColor = Color.valueOf("2b2b33");
         }};
         obsidianBoulder = new Prop("obsidian-boulder"){{
@@ -335,6 +343,24 @@ public class DelivaricaBlocks {
 
             upgrades.addAll(
                 new UnitType[]{DelivaricaUnits.photon, DelivaricaUnits.photonArmored}
+            );
+        }};
+
+        // ЭНЕРГЕТИКА
+        mawTurbine = new ThermalGenerator("vent-turbine"){{
+            requirements(Category.power, ItemStack.with(DelivaricaItems.chromium, 40, DelivaricaItems.tantalum, 20));
+            size = 3;
+            health = 500;
+            powerProduction = 4f; 
+            attribute = Attribute.heat; 
+            generateEffect = mindustry.content.Fx.turbinegenerate;
+            effectChance = 0.1f;
+
+            drawer = new DrawMulti(
+                new DrawDefault(), 
+                new DrawBlurSpin("-rotator", 2f){{ 
+                    blurThresh = 0.01f;
+                }}
             );
         }};
 
