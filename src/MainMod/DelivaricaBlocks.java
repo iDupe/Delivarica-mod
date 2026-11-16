@@ -338,8 +338,8 @@ public class DelivaricaBlocks {
             requirements(Category.units, ItemStack.with(DelivaricaItems.chromium, 80));
             size = 3;
             consumePower(2f);
-            consumeItems(ItemStack.with(DelivaricaItems.ramtanium, 20)); // Уточни точное имя поля Рамтана в DelivaricaItems
-            constructTime = 60f * 10f; // 10 секунд на улучшение
+            consumeItems(ItemStack.with(DelivaricaItems.ramtanium, 20));
+            constructTime = 60f * 10f;
 
             upgrades.addAll(
                 new UnitType[]{DelivaricaUnits.photon, DelivaricaUnits.photonArmored}
@@ -428,17 +428,15 @@ public class DelivaricaBlocks {
             rotateSpeed = 6f;
             shootSound = Sounds.shoot;
 
-            // Поочерёдная стрельба из двух стволов
             shoot = new ShootAlternate(){{
                 spread = 3.5f;
             }};
 
-            // Передаём только префикс "delivarica-", игра сама подставит "block-2"
             drawer = new DrawTurret("delivarica-"){{
                 parts.add(
                     new RegionPart("-barrel-l"){{
                         progress = PartProgress.recoil;
-                        under = true; // Чтобы ствол заезжал ПОД корпус турели при отдаче
+                        under = true;
                         moveY = -2.5f;
                         recoilIndex = 0;
                     }},
