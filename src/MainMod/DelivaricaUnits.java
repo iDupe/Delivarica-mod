@@ -15,7 +15,8 @@ import mindustry.type.UnitType;
 import mindustry.type.Weapon;
 
 public class DelivaricaUnits {
-    public static UnitType side, photon, photonArmored, bunch;
+    // Добавили bunchArmored в список
+    public static UnitType side, photon, photonArmored, bunch, bunchArmored;
 
     public static void load() {
 
@@ -147,12 +148,6 @@ public class DelivaricaUnits {
             }});
         }};
 
-        Events.on(ClientLoadEvent.class, e -> {
-            photonArmored.legRegion = photon.legRegion;
-            photonArmored.baseRegion = photon.baseRegion;
-            photonArmored.cellRegion = photon.cellRegion;
-        });
-
         // Bunch
         bunch = new UnitType("bunch"){{
             constructor = MechUnit::create;
@@ -171,8 +166,11 @@ public class DelivaricaUnits {
             mechSideSway = 0.4f;
             mechStepParticles = true;
 
-            weapons.add(new Weapon(name + "-w"){{
-                reload = 45f;
+            // Используем пушку от обычного банча
+            weapons.add(new Weapon(this.name + "-w"){{
+                reload = 60f; // 1 выстрел в секунду (60 тиков)
+                
+                // Твои родные координаты и слои (НЕ ТРОГАЕМ)
                 x = 6.5f;
                 y = 0f;
                 top = false;
@@ -182,17 +180,101 @@ public class DelivaricaUnits {
                 rotate = false;
                 ejectEffect = Fx.casing2;
 
-                bullet = new BasicBulletType(5.5f, 35){{
-                    width = 9f;
-                    height = 12f;
-                    lifetime = 35f;
-                    splashDamageRadius = 16f;
-                    splashDamage = 15f;
-                    hitEffect = Fx.blastExplosion;
-                    backColor = Pal.lightOrange;
-                    frontColor = Color.white;
+                // --- НАСТРОЙКИ ДРОБИ ---
+                inaccuracy = 12f;       // Разброс (пишется напрямую)
+                shoot.shots = 5;        // Количество дробинок (пишется через shoot)
+                shoot.shotDelay = 0f;   // Стрелять всеми разом
+
+                bullet = new BasicBulletType(5f, 25){{ 
+                    width = 5f;
+                    height = 7f;
+                    lifetime = 18f; 
+                    
+                    trailLength = 15;           
+                    trailWidth = 2f;            
+                    trailColor = Color.gray;    
+                    
+                    backColor = Color.darkGray;
+                    frontColor = Color.lightGray;
+                    
+                    homingPower = 0.15f;  
+                    homingRange = 80f;    
+                    
+                    hitEffect = Fx.hitBulletColor;
+                    despawnEffect = Fx.none;
                 }};
             }});
         }};
+
+        // Armored Bunch (Твой новый юнит)
+        bunchArmored = new UnitType("bunch-armored"){{
+            constructor = MechUnit::create;
+            aiController = GroundAI::new;
+
+            flying = false;
+            speed = 0.45f;       // Чуть медленнее обычного (было 0.55f)
+            hitSize = 12f;       // Такой же размер
+            health = 1350f;      // Значительно больше ХП (было 950f)
+            armor = 10f;         // Толще броня (было 6f)
+            rotateSpeed = 2.5f;  // Медленнее поворачивается (было 3f)
+            outlineColor = Color.valueOf("36363c");
+
+            mechStride = 5.5f;
+            mechFrontSway = 0.3f;
+            mechSideSway = 0.4f;
+            mechStepParticles = true;
+
+            // Используем пушку от обычного банча
+            weapons.add(new Weapon(bunch.name + "-w"){{
+                reload = 60f; // 1 выстрел в секунду (60 тиков)
+                
+                // Твои родные координаты и слои (НЕ ТРОГАЕМ)
+                x = 6.5f;
+                y = 0f;
+                top = false;
+                layerOffset = -0.01f;
+                mirror = true;
+                alternate = true;
+                rotate = false;
+                ejectEffect = Fx.casing2;
+
+                // --- НАСТРОЙКИ ДРОБИ ---
+                inaccuracy = 12f;       // Разброс (пишется напрямую)
+                shoot.shots = 5;        // Количество дробинок (пишется через shoot)
+                shoot.shotDelay = 0f;   // Стрелять всеми разом
+
+                bullet = new BasicBulletType(5f, 25){{ 
+                    width = 5f;
+                    height = 7f;
+                    lifetime = 18f; 
+                    
+                    trailLength = 15;           
+                    trailWidth = 2f;            
+                    trailColor = Color.gray;    
+                    
+                    backColor = Color.darkGray;
+                    frontColor = Color.lightGray;
+                    
+                    homingPower = 0.15f;  
+                    homingRange = 80f;    
+                    
+                    hitEffect = Fx.hitBulletColor;
+                    despawnEffect = Fx.none;
+                }};
+            }});
+        }};
+
+        // Подтягиваем ноги/базу/ячейки для армированных версий
+        Events.on(ClientLoadEvent.class, e -> {
+            // Для фотона
+            photonArmored.legRegion = photon.legRegion;
+            photonArmored.baseRegion = photon.baseRegion;
+            photonArmored.cellRegion = photon.cellRegion;
+            
+            // Для банча
+            bunchArmored.legRegion = bunch.legRegion;
+            bunchArmored.baseRegion = bunch.baseRegion;
+            bunchArmored.cellRegion = bunch.cellRegion;
+        });
     }
 }
