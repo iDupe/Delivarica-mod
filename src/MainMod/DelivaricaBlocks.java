@@ -2,6 +2,7 @@ package MainMod;
 
 import arc.graphics.Color;
 import arc.struct.Seq;
+import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.content.Liquids;
 import mindustry.content.UnitTypes;
@@ -15,6 +16,7 @@ import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
 import mindustry.world.blocks.power.ThermalGenerator;
 import mindustry.world.draw.DrawMulti;
+import mindustry.world.draw.DrawRegion;
 import mindustry.world.draw.DrawDefault;
 import mindustry.world.draw.DrawBlurSpin; 
 import mindustry.world.meta.Attribute;
@@ -349,18 +351,27 @@ public class DelivaricaBlocks {
         // ЭНЕРГЕТИКА
         mawTurbine = new ThermalGenerator("vent-turbine"){{
             requirements(Category.power, ItemStack.with(DelivaricaItems.chromium, 40, DelivaricaItems.tantalum, 20));
+            
+            attribute = Attribute.steam; 
+            displayEfficiency = false; 
+            ambientSound = Sounds.loopHum;
+            ambientSoundVolume = 0.06f;
+            minEfficiency = 9f - 0.0001f;
+            displayEfficiencyScale = 1f / 9f;
+
             size = 3;
             health = 500;
-            powerProduction = 4f; 
-            attribute = Attribute.heat; 
-            generateEffect = mindustry.content.Fx.turbinegenerate;
-            effectChance = 0.1f;
+            powerProduction = 4f / 9f;
+            generateEffect = Fx.turbinegenerate;
+            effectChance = 0.05f;
 
             drawer = new DrawMulti(
-                new DrawDefault(), 
-                new DrawBlurSpin("-rotator", 2f){{ 
-                    blurThresh = 0.01f;
-                }}
+                new DrawDefault(),
+                new DrawRegion("-rotator") {{
+                    spinSprite = true;
+                    rotateSpeed = 4f;
+                }},
+                new DrawRegion("-top")
             );
         }};
 
