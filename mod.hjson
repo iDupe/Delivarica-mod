@@ -17,7 +17,7 @@ Our first full-fledged mod makes a significant contribution to the expansion of 
 author: '''
 "[coral]Revision [accent]Team [gray]"
 '''
-minGameVersion: 160.7
+minGameVersion: 160
 version: v0.1
 hidden: false
 main: "MainMod.Delivarica"
