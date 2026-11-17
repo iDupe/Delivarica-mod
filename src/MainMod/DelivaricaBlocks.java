@@ -91,7 +91,7 @@ public class DelivaricaBlocks {
     public static ThermalGenerator mawTurbine;
 
     // Производство
-    public static GenericCrafter ramtaniumSmelter; // ДОБАВЛЕНО СЮДА
+    public static GenericCrafter ramtaniumSmelter, lustriteMixer; 
 
     // Турели
     public static ItemTurret range;
@@ -395,6 +395,27 @@ public class DelivaricaBlocks {
             drawer = new DrawMulti(
                 new DrawRegion("-bottom"),
                 new DrawArcSmelt(),
+                new DrawDefault()
+            );
+        }};
+
+        lustriteMixer = new GenericCrafter("lustrite-mixer"){{
+            requirements(Category.crafting, ItemStack.with(DelivaricaItems.chromium, 60, DelivaricaItems.nickel, 40));
+            size = 3;
+            health = 1000;
+            craftTime = 60f;
+            hasPower = true;
+            consumePower(1.2f);
+
+            consumeItems(ItemStack.with(DelivaricaItems.chromium, 1, DelivaricaItems.nickel, 2));
+            outputItem = new ItemStack(DelivaricaItems.lustrite, 2);
+
+            drawer = new DrawMulti(
+                new DrawRegion("-bottom"),
+                new DrawRegion("-rotator") {{
+                    spinSprite = true;
+                    rotateSpeed = 4f;
+                }},
                 new DrawDefault()
             );
         }};
