@@ -92,7 +92,7 @@ public class DelivaricaBlocks {
 
     // Энергетика
     public static ThermalGenerator mawTurbine;
-    public static xNode xBeamNode;
+    public static xNode xNode;
 
     // Производство
     public static GenericCrafter ramtaniumSmelter, lustriteMixer; 
@@ -396,7 +396,7 @@ public class DelivaricaBlocks {
             );
         }};
 
-        xBeamNode = new xNode("x-node") {{
+        xNode = new xNode("x-node") {{
             requirements(Category.power, ItemStack.with(DelivaricaItems.chromium, 12));
             consumesPower = outputsPower = true;
             health = 40;
