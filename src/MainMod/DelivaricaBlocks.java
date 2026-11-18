@@ -1,6 +1,7 @@
 package MainMod;
 
 import arc.graphics.Color;
+import arc.math.Interp;
 import arc.struct.Seq;
 import mindustry.content.Fx;
 import mindustry.content.Items;
@@ -16,6 +17,7 @@ import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
 import mindustry.world.blocks.power.ThermalGenerator;
 import mindustry.world.draw.DrawMulti;
+import mindustry.world.draw.DrawParticles;
 import mindustry.world.draw.DrawRegion;
 import mindustry.world.draw.DrawArcSmelt;
 import mindustry.world.draw.DrawDefault;
@@ -385,7 +387,7 @@ public class DelivaricaBlocks {
             requirements(Category.crafting, ItemStack.with(DelivaricaItems.chromium, 90, DelivaricaItems.nickel, 75));
             size = 3;           
             health = 800;       
-            craftTime = 90f;    
+            craftTime = 60f;    
             hasPower = true;
             consumePower(1f); 
             
@@ -403,21 +405,27 @@ public class DelivaricaBlocks {
             requirements(Category.crafting, ItemStack.with(DelivaricaItems.chromium, 60, DelivaricaItems.nickel, 40));
             size = 3;
             health = 1000;
-            craftTime = 60f;
+            craftTime = 120f;
             hasPower = true;
             consumePower(1.2f);
 
-            consumeItems(ItemStack.with(DelivaricaItems.chromium, 1, DelivaricaItems.nickel, 2));
-            outputItem = new ItemStack(DelivaricaItems.lustrite, 2);
-
-            drawer = new DrawMulti(
-                new DrawRegion("-bottom"),
-                new DrawRegion("-rotator") {{
-                    spinSprite = true;
-                    rotateSpeed = 4f;
-                }},
-                new DrawDefault()
+            drawer = new DrawMulti(new DrawRegion("-bottom"),
+            new DrawParticles(){{
+                color = Color.valueOf("a0abe3");
+                alpha = 0.5f;
+                particleSize = 3f;
+                particles = 10;
+                particleRad = 9f;
+                particleLife = 200f;
+                reverse = true;
+                particleSizeInterp = Interp.one;
+            }},
+            new DrawRegion("-rotator") {{spinSprite = true; rotateSpeed = 4f;}},
+            new DrawDefault()
             );
+
+            consumeItems(ItemStack.with(DelivaricaItems.ramtanium, 1, DelivaricaItems.nickel, 2));
+            outputItem = new ItemStack(DelivaricaItems.lustrite, 1);
         }};
 
         // ПРЕДМЕТНЫЕ
