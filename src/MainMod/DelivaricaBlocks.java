@@ -46,6 +46,7 @@ import mindustry.world.blocks.payloads.PayloadRouter;
 import mindustry.world.blocks.production.Drill;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.units.Reconstructor;
+import MainMod.Blocks.xNode;
 
     // РЕГИСТРАЦИЯ
 
@@ -91,6 +92,7 @@ public class DelivaricaBlocks {
 
     // Энергетика
     public static ThermalGenerator mawTurbine;
+    public static xNode xBeamNode;
 
     // Производство
     public static GenericCrafter ramtaniumSmelter, lustriteMixer; 
@@ -380,6 +382,17 @@ public class DelivaricaBlocks {
                 }},
                 new DrawRegion("-top")
             );
+        }};
+
+        xBeamNode = new xNode("x-node") {{
+            requirements(Category.power, ItemStack.with(DelivaricaItems.chromium, 12));
+            consumesPower = outputsPower = true;
+            health = 40;
+            range = 6;
+            fogRadius = 1;
+            researchCost = ItemStack.with(DelivaricaItems.chromium, 12);
+            crushFragile = true;
+            consumePowerBuffered(500f);
         }};
 
         // ПРОИЗВОДСТВО
