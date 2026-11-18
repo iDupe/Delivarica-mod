@@ -1,24 +1,34 @@
-name: Delivarica-mod
-displayName: Delivarica
-description: "
-
-Our first full-fledged mod makes a significant contribution to the expansion of game content by adding a new planet. Despite potential technical errors or flaws. I am sure that this mod will enrich the user's gaming experience. I would appreciate any feedback that will help improve the quality of the mod.
-    
-    [stat]Authors:
-       Sprites -  Splinter  (Split) 
-        Code - iÐupe
-        Maps- Yartera 
-        Music- 深淵
-        
-    [stat]Special Thanks:
-        Bloody Ocean
-        Afarius
-"
-author: '''
-"[coral]Revision [accent]Team [gray]"
-'''
-minGameVersion: 160
-version: v0.1
-hidden: false
+displayName:"[[]#e06c4f]De[[]][[]#B5634B]li[[]][[]#8A5A47]va[[]][[]#5E5042]ri[[]][[]#33473e]ca[[]]"
+subtitle: "Know what YOU value..."
+name: "Delivarica-mod"
+author: "[[]#e06c4f]Revision[[]] [[]#fed570]Team[[]] [[]#808080][[]]"
 main: "MainMod.Delivarica"
+description:'''
+[[]#fed570]Delivarica...[[]][[]#ffffff][[]] Everyone loves a good campaign on a brand-new planet. We know how annoying those [[]#fed570]cookie-cutter JSON mods[[]][[]#ffffff][[]] can get, so... Our mod brings a full-fledged playable planet to the table:
+
+• [[]#fed570]Brand-new, unique mechanics[[]][[]#ffffff][[]] (WIP)
+• [[]#fed570]40+ sectors[[]][[]#ffffff][[]] (WIP)
+• [[]#fed570]Custom polished visuals[[]][[]#ffffff][[]] (WIP)
+
+We really went all out to pack this with as much awesome gameplay as possible. As this is our team's [[]#fed570]first-ever Java project[[]][[]#ffffff][[]], we'd hugely appreciate any feedback you've got!
+    
+
+    [[]#ffffff]-[[]] [[]#fed570] AUTHORS[[]] [[]#ffffff]-[[]]
+
+    [[]#ffffff][[]] [[]#787878]Splinter[[]]  (Split)[[]#ffffff][[]] 
+    [[]#ffffff][[]]i[[]#d6cc94]Ð[[]][[]#cfbd5b]u[[]][[]#d1b930]p[[]#ffca2b]e[[]][[]#ffffff][[]]
+    [[]#bd0029]Charizard[[]][[]#ffffff][[]]
+    [[]#0052f7]Me[[]][[]#39a5f7]ch[[]][[]#39bbf7]an[[]][[]#00f7d2]ic[[]][[]#ffffff][[]]
+    [[]#6ae861]Yartera[[]][[]#ffffff][[]]
+    [[]#b681db]深[[]][[]#4d2e63]淵[[]][[]#ffffff][[]]
+
+
+    [[]#ffffff]-[[]] [[]#fed570] SPECIAL THANKS [[]#ffffff]-[[]]
+
+    [[]#fed570][[]] [[]#ffffff]Bloody Ocean[[]]
+    [[]#fed570][[]] [[]#ffffff]Afarius[[]]
+'''
+version: v0.1
+minGameVersion: 160
 java: true
+hidden: false
