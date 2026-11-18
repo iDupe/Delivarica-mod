@@ -53,8 +53,8 @@ import MainMod.Blocks.xNode;
 public class DelivaricaBlocks {
 
     // 1. Рельеф и окружение
-    public static Floor redSand, sandrock, obsidian, rindit, smoothRindit, drangite, whiteIce, letrite, letriteCrush;
-    public static StaticWall sandrockWall, obsidianWall, sandrockWallLarge, obsidianWallLarge, rinditWall, rinditWallLarge, drangiteWall, drangiteWallLarge, whiteIceWall, whiteIceWallLarge, letriteWall, letriteWallLarge;
+    public static Floor redSand, sandrock, obsidian, rindit, smoothRindit, drangite, whiteIce, letrite, letriteCrush, whiteSnow;
+    public static StaticWall sandrockWall, obsidianWall, sandrockWallLarge, obsidianWallLarge, rinditWall, rinditWallLarge, drangiteWall, drangiteWallLarge, whiteIceWall, whiteIceWallLarge, letriteWall, letriteWallLarge,whiteSnowWall, whiteSnowWallLarge;
     public static TallBlock phosphoriteCubes, neotiteCluster;
     public static SteamVent obsidianVent;
     public static Prop obsidianBoulder, rinditBoulder, sandrockBoulder, drangiteBoulder, letriteBoulder;
@@ -241,6 +241,18 @@ public class DelivaricaBlocks {
         }};
         letriteBoulder = new Prop("letrite-boulder"){{
             variants = 2;
+        }};
+        whiteSnow = new Floor("white-snow"){{
+            variants = 3;
+            mapColor = Color.valueOf("e2eaf0");
+        }};
+        whiteSnowWall = new StaticWall("white-snow-wall"){{
+            variants = 2;
+            mapColor = Color.valueOf("e2eaf0");
+        }};
+        whiteSnowWallLarge = new StaticWall("white-snow-wall-large"){{
+            variants = 1;
+            mapColor = Color.valueOf("e2eaf0");
         }};
 
         // РУДЫ
