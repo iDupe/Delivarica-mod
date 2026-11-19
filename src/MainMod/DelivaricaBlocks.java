@@ -54,7 +54,7 @@ public class DelivaricaBlocks {
     // 1. Рельеф и окружение
     public static Floor redSand, sandrock, obsidian, rindit, smoothRindit, drangite, whiteIce, letrite, letriteCrush, whiteSnow;
     public static StaticWall sandrockWall, obsidianWall, sandrockWallLarge, obsidianWallLarge, rinditWall, rinditWallLarge, drangiteWall, drangiteWallLarge, whiteIceWall, whiteIceWallLarge, letriteWall, letriteWallLarge,whiteSnowWall, whiteSnowWallLarge;
-    public static TallBlock phosphoriteCubes, neotiteCluster;
+    public static TallBlock phosphoriteCubes, neotiteCluster, rinditColumn;
     public static SteamVent obsidianVent;
     public static Prop obsidianBoulder, rinditBoulder, sandrockBoulder, drangiteBoulder, letriteBoulder;
 
@@ -251,6 +251,11 @@ public class DelivaricaBlocks {
         whiteSnowWallLarge = new StaticWall("white-snow-wall-large"){{
             variants = 1;
             mapColor = Color.valueOf("e2eaf0");
+        }};
+
+        rinditColumn = new TallBlock("rindit-column"){{
+            variants = 2;
+            clipSize = 128f;
         }};
 
         // РУДЫ
