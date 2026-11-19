@@ -20,6 +20,7 @@ public class Delivarica extends Mod {
     @Override
     public void loadContent() {
 
+        DelivaricaStatusEffects.load();
         DelivaricaTeams.load();
         DelivaricaItems.load();
         DelivaricaUnits.load();
