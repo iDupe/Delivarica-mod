@@ -60,7 +60,7 @@ public class DelivaricaUnits {
             aiController = GroundAI::new;
 
             flying = false;
-            speed = 0.75f;
+            speed = 0.60f; // Скорость понижена (было 0.75f)
             hitSize = 11f;
             health = 420f;
             armor = 2f;
@@ -83,15 +83,15 @@ public class DelivaricaUnits {
                 rotate = false;
                 ejectEffect = Fx.casing1;
 
-                bullet = new ArtilleryBulletType(4f, 18, "shell"){{
+                bullet = new ArtilleryBulletType(3f, 12, "shell"){{ // Урон понижен до 12
                     hitEffect = Fx.flakExplosion;
                     knockback = 0.6f;
-                    lifetime = 40f;
+                    lifetime = 48f; // 3 * 48 = 144f (ровно 18 блоков)
                     width = height = 6.5f;
                     collides = true;
                     collidesTiles = true;
                     splashDamageRadius = 14f;
-                    splashDamage = 20f;
+                    splashDamage = 14f; // Урон по площади понижен до 14
                     homingPower = 0.08f;
                     homingRange = 50f;
                     backColor = Pal.gray;
@@ -107,7 +107,7 @@ public class DelivaricaUnits {
             aiController = GroundAI::new;
 
             flying = false;
-            speed = 0.60f;
+            speed = 0.48f; // Скорость понижена (было 0.60f)
             hitSize = 11f;
             health = 620f; // 420 + 200 HP
             armor = 5f;
@@ -130,15 +130,15 @@ public class DelivaricaUnits {
                 rotate = false;
                 ejectEffect = Fx.casing1;
 
-                bullet = new ArtilleryBulletType(4f, 18, "shell"){{
+                bullet = new ArtilleryBulletType(3f, 12, "shell"){{ // Урон понижен до 12
                     hitEffect = Fx.flakExplosion;
                     knockback = 0.6f;
-                    lifetime = 40f;
+                    lifetime = 48f; // 3 * 48 = 144f (ровно 18 блоков)
                     width = height = 6.5f;
                     collides = true;
                     collidesTiles = true;
                     splashDamageRadius = 14f;
-                    splashDamage = 20f;
+                    splashDamage = 14f; // Урон по площади понижен до 14
                     homingPower = 0.08f;
                     homingRange = 50f;
                     backColor = Pal.gray;
@@ -166,11 +166,10 @@ public class DelivaricaUnits {
             mechSideSway = 0.4f;
             mechStepParticles = true;
 
-            // Используем пушку от обычного банча
+            // Пушка от обычного банча
             weapons.add(new Weapon(this.name + "-w"){{
-                reload = 60f; // 1 выстрел в секунду (60 тиков)
+                reload = 60f; // 1 выстрел в секунду 
                 
-                // Твои родные координаты и слои (НЕ ТРОГАЕМ)
                 x = 6.5f;
                 y = 0f;
                 top = false;
@@ -180,10 +179,10 @@ public class DelivaricaUnits {
                 rotate = false;
                 ejectEffect = Fx.casing2;
 
-                // --- НАСТРОЙКИ ДРОБИ ---
-                inaccuracy = 12f;       // Разброс (пишется напрямую)
-                shoot.shots = 5;        // Количество дробинок (пишется через shoot)
-                shoot.shotDelay = 0f;   // Стрелять всеми разом
+                // НАСТРОЙКИ ДРОБИ
+                inaccuracy = 12f;       // Разброс
+                shoot.shots = 5;        // Количество дробинок
+                shoot.shotDelay = 0f;   
 
                 bullet = new BasicBulletType(5f, 25){{ 
                     width = 5f;
