@@ -24,7 +24,7 @@ import mindustry.world.draw.DrawDefault;
 import mindustry.world.meta.Attribute;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.draw.DrawTurret;
-import mindustry.world.blocks.production.GenericCrafter; // ДОБАВЛЕНО
+import mindustry.world.blocks.production.GenericCrafter;
 
 import mindustry.world.blocks.environment.OreBlock;
 import mindustry.world.blocks.distribution.BufferedItemBridge;
@@ -46,15 +46,14 @@ import mindustry.world.blocks.payloads.PayloadRouter;
 import mindustry.world.blocks.production.Drill;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.units.Reconstructor;
+import mindustry.world.blocks.units.UnitFactory;
 import MainMod.Blocks.xNode;
-
-    // РЕГИСТРАЦИЯ
 
 public class DelivaricaBlocks {
 
     // 1. Рельеф и окружение
     public static Floor redSand, sandrock, obsidian, rindit, smoothRindit, drangite, whiteIce, letrite, letriteCrush, whiteSnow;
-    public static StaticWall sandrockWall, obsidianWall, sandrockWallLarge, obsidianWallLarge, rinditWall, rinditWallLarge, drangiteWall, drangiteWallLarge, whiteIceWall, whiteIceWallLarge, letriteWall, letriteWallLarge,whiteSnowWall, whiteSnowWallLarge;
+    public static StaticWall sandrockWall, obsidianWall, sandrockWallLarge, obsidianWallLarge, rinditWall, rinditWallLarge, drangiteWall, drangiteWallLarge, whiteIceWall, whiteIceWallLarge, letriteWall, letriteWallLarge, whiteSnowWall, whiteSnowWallLarge;
     public static TallBlock phosphoriteCubes, neotiteCluster, rinditColumn;
     public static SteamVent obsidianVent;
     public static Prop obsidianBoulder, rinditBoulder, sandrockBoulder, drangiteBoulder, letriteBoulder;
@@ -78,8 +77,9 @@ public class DelivaricaBlocks {
     // Сборщики
     public static Constructor basicComponentConstructor, basicCargoConstructor;
     public static Reconstructor basicUnitAmplifier;
+    public static UnitFactory groundConstructor;
 
-    // Предментные
+    // Предметные
     public static Duct inertialDuct;
     public static Junction inertialJunction;
     public static Router inertialRouter;
@@ -95,10 +95,12 @@ public class DelivaricaBlocks {
     public static xNode xNode;
 
     // Производство
-    public static GenericCrafter ramtaniumSmelter, lustriteMixer; 
+    public static GenericCrafter ramtaniumSmelter, lustriteMixer;
 
     // Турели
     public static ItemTurret range;
+    public static ItemTurret hawk;
+    public static ItemTurret concussion;
 
     public static class InertialDuctRouter extends DuctRouter {
         public InertialDuctRouter() {
@@ -374,12 +376,37 @@ public class DelivaricaBlocks {
             );
         }};
 
+        groundConstructor = new UnitFactory("ground-constructor"){{
+            requirements(Category.units, ItemStack.with(
+                DelivaricaItems.chromium, 80,
+                DelivaricaItems.nickel, 60
+            ));
+            size = 3;
+            consumePower(1.5f);
+
+            plans = Seq.with(
+                new UnitPlan(
+                    DelivaricaUnits.photon,
+                    60f * 15f,
+                    ItemStack.with(DelivaricaItems.chromium, 15, DelivaricaItems.nickel, 10)
+                )
+            );
+        }
+
+        @Override
+        public void load() {
+            super.load();
+            // Берем спрайт выхода от basic-cargo-constructor
+            outRegion = arc.Core.atlas.find("delivarica-mod-basic-cargo-constructor-out");
+        }};
+
+
         // ЭНЕРГЕТИКА
         mawTurbine = new ThermalGenerator("vent-turbine"){{
             requirements(Category.power, ItemStack.with(DelivaricaItems.chromium, 40, DelivaricaItems.tantalum, 20));
-            
-            attribute = Attribute.steam; 
-            displayEfficiency = false; 
+
+            attribute = Attribute.steam;
+            displayEfficiency = false;
             ambientSound = Sounds.loopHum;
             ambientSoundVolume = 0.06f;
             minEfficiency = 9f - 0.0001f;
@@ -415,12 +442,12 @@ public class DelivaricaBlocks {
         // ПРОИЗВОДСТВО
         ramtaniumSmelter = new GenericCrafter("ramtanium-smelter"){{
             requirements(Category.crafting, ItemStack.with(DelivaricaItems.chromium, 90, DelivaricaItems.nickel, 75));
-            size = 3;           
-            health = 800;       
-            craftTime = 60f;    
+            size = 3;
+            health = 800;
+            craftTime = 60f;
             hasPower = true;
-            consumePower(1f); 
-            
+            consumePower(1f);
+
             consumeItems(ItemStack.with(DelivaricaItems.nickel, 2, DelivaricaItems.chromium, 1));
             outputItem = new ItemStack(DelivaricaItems.ramtanium, 1);
 
@@ -504,17 +531,16 @@ public class DelivaricaBlocks {
             invert = true;
         }};
 
-        // ЖИДКОСТНЫЕ
-
         // ТУРЕЛИ
+
         range = new ItemTurret("range"){{
             requirements(Category.turret, ItemStack.with(
                 DelivaricaItems.chromium, 45
             ));
             size = 2;
-            health = 720;
-            range = 190f;
-            reload = 35f;
+            health = 420;
+            range = 160f;
+            reload = 30f;
             recoil = 1.5f;
             recoils = 2;
             rotateSpeed = 6f;
@@ -542,11 +568,144 @@ public class DelivaricaBlocks {
             }};
 
             ammo(
-                DelivaricaItems.chromium, new BasicBulletType(5f, 28){{
+                DelivaricaItems.chromium, new BasicBulletType(5f, 22){{
+                    sprite = "shell"; 
                     width = 9f;
                     height = 12f;
-                    lifetime = 40f;
+                    lifetime = 32f;
                     ammoMultiplier = 3;
+                    backColor = Color.valueOf("948f99");
+                    frontColor = Color.white;
+                }},
+                DelivaricaItems.ramtanium, new BasicBulletType(5f, 45){{
+                    sprite = "shell";
+                    width = 10f;
+                    height = 14f;
+                    lifetime = 32f;
+                    ammoMultiplier = 2;
+                    pierceCap = 2;
+                    pierceArmor = true;
+                    armorMultiplier = 1.5f;
+                    backColor = Color.valueOf("b8c6ae");
+                    frontColor = Color.white;
+                }}
+            );
+        }};
+
+        hawk = new ItemTurret("hawk"){{
+            requirements(Category.turret, ItemStack.with(
+                DelivaricaItems.chromium, 60
+            ));
+            size = 2;
+            health = 720;
+            range = 120f;
+            reload = 60f;
+            recoil = 1.5f;
+            recoils = 2;
+            rotateSpeed = 4f;
+            shootSound = Sounds.shootSpectre;
+
+            targetAir = false;
+
+            shoot = new ShootAlternate(){{
+                spread = 3.5f;
+            }};
+
+            drawer = new DrawTurret("delivarica-"){{
+                parts.add(
+                    new RegionPart("-blade-l"){{
+                        progress = PartProgress.recoil;
+                        under = true;
+                        moveY = -2.5f;
+                        recoilIndex = 0;
+                    }},
+                    new RegionPart("-blade-r"){{
+                        progress = PartProgress.recoil;
+                        under = true;
+                        moveY = -2.5f;
+                        recoilIndex = 1;
+                    }}
+                );
+            }};
+
+            ammo(
+                DelivaricaItems.nickel, new BasicBulletType(5f, 30){{
+                    sprite = "bullet";
+                    width = 12f;
+                    height = 16f;
+                    lifetime = 24f;
+                    ammoMultiplier = 2;
+                    knockback = 1.2f;
+                    collidesAir = false;
+                    backColor = Color.valueOf("6d7885");
+                    frontColor = Color.white;
+                }}
+            );
+        }};
+
+        concussion = new ItemTurret("concussion"){{
+            requirements(Category.turret, ItemStack.with(
+                DelivaricaItems.chromium, 70, DelivaricaItems.nickel, 40
+            ));
+            size = 2;
+            health = 520;
+            range = 80f;
+            reload = 55f;
+            recoil = 1.2f;
+            rotateSpeed = 5f;
+            shootSound = Sounds.shootArtillerySmall;
+            ammoPerShot = 2;
+
+            shoot.shots = 5;
+            shoot.shotDelay = 0f;
+            inaccuracy = 12f;
+
+            ammo(
+                DelivaricaItems.nickel, new BasicBulletType(5f, 10){{
+                    sprite = "bullet";
+                    width = 8f;
+                    height = 10f;
+                    lifetime = 16f;
+                    trailLength = 15;
+                    trailWidth = 2f;
+                    trailColor = Color.gray;
+                    backColor = Color.valueOf("6d7885");
+                    frontColor = Color.white;
+                    hitEffect = Fx.hitBulletColor;
+                    despawnEffect = Fx.none;
+                    ammoMultiplier = 4f; // Умножено на 2 (было 2f)
+                }},
+
+                DelivaricaItems.sulfur, new BasicBulletType(5f, 15){{
+                    sprite = "bullet";
+                    width = 8f;
+                    height = 10f;
+                    lifetime = 16f;
+                    trailLength = 15;
+                    trailWidth = 2f;
+                    trailColor = Color.valueOf("dede6c");
+                    backColor = Color.valueOf("8a7a20");
+                    frontColor = Color.valueOf("e8d45a");
+                    hitEffect = Fx.hitBulletColor;
+                    despawnEffect = Fx.none;
+                    status = DelivaricaStatusEffects.inSulfur;
+                    statusDuration = 60f * 8f;
+                    ammoMultiplier = 3f;
+                }},
+
+                DelivaricaItems.lustrite, new BasicBulletType(5.5f, 25){{
+                    sprite = "bullet";
+                    width = 8f;
+                    height = 10f;
+                    lifetime = 14.55f;
+                    trailLength = 18;
+                    trailWidth = 2.2f;
+                    trailColor = Color.valueOf("8e94cc");
+                    backColor = Color.valueOf("5a4a9a");
+                    frontColor = Color.valueOf("c8cff2");
+                    hitEffect = Fx.hitBulletColor;
+                    despawnEffect = Fx.none;
+                    reloadMultiplier = 0.7f;
                 }}
             );
         }};
