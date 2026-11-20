@@ -15,10 +15,6 @@ public class Delivarica extends Mod {
     public static Gertat gertat;
 
     @Override
-    public void init() {
-    }
-
-    @Override
     public void loadContent() {
         // Загрузка контента (по порядку зависимостей) | Load content (ordered by dependencies)
         DelivaricaStatusEffects.load();
@@ -30,7 +26,7 @@ public class Delivarica extends Mod {
         gertat = new Gertat();
         delivia = new Delivia();
 
-        DelivaricaTechTree.load(); 
+        DelivaricaTechTree.load();
 
         // Палитра поверхностных блоков для астероидов | Surface block palette for asteroids
         Block[] tints = {
