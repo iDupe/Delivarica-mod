@@ -17,6 +17,8 @@ public class Delivarica extends Mod {
     @Override
     public void loadContent() {
         // Загрузка контента (по порядку зависимостей) | Load content (ordered by dependencies)
+
+        DelivaricaTeams.load();
         DelivaricaStatusEffects.load();
         DelivaricaItems.load();
         DelivaricaUnits.load();
