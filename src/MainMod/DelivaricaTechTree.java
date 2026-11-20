@@ -4,6 +4,7 @@ import arc.struct.Seq;
 import mindustry.game.Objectives.Produce;
 import mindustry.game.Objectives.Research;
 import mindustry.game.Objectives.SectorComplete;
+import mindustry.type.ItemStack;
 
 import static MainMod.DelivaricaBlocks.*;
 import static MainMod.DelivaricaItems.*;
@@ -14,7 +15,8 @@ import static mindustry.content.TechTree.*;
 public class DelivaricaTechTree {
 
     public static void load() {
-        Delivarica.delivia.techTree = nodeRoot("delivia", coreReset, () -> {
+        // Стартовое ядро — coreOff | Starting core — coreOff
+        Delivarica.delivia.techTree = nodeRoot("delivia", coreOff, () -> {
 
             // 1. Логистика (сначала перекрёсток, затем роутер) | Distribution (junction first, then router)
             node(inertialDuct, () -> {
@@ -42,7 +44,7 @@ public class DelivaricaTechTree {
                 node(lustriteMixer);
             });
 
-            // 4. Энергетика | Power
+            // 4. Энергетика (турбина -> узел) | Power (turbine -> node)
             node(mawTurbine, () -> {
                 node(xNode);
             });
@@ -57,8 +59,13 @@ public class DelivaricaTechTree {
                 node(concussion, Seq.with(new Research(sulfur)), () -> {});
             });
 
-            // 6. Второе ядро | Secondary core
-            node(coreOff);
+            // 6. Улучшенное ядро (дорогое исследование) | Upgraded core (high research cost)
+            node(coreReset, ItemStack.with(
+                chromium, 5000,
+                nickel, 3500,
+                ramtanium, 1500,
+                lustrite, 800
+            ), () -> {});
 
             // 7. Юниты и конструкторы | Units and constructors
             node(basicCargoConstructor, () -> {
@@ -66,14 +73,18 @@ public class DelivaricaTechTree {
                     // Ветка апгрейдеров брони | Armor upgraders branch
                     node(basicUnitAmplifier, Seq.with(new Produce(ramtanium)), () -> {});
 
-                    // Ветка реконструкторов тира юнитов (заглушка под будущий блок) | Tier reconstructors branch (placeholder)
-                    // node(tier1Reconstructor, () -> { ... });
+                    // Ветка реконструкторов тира юнитов | Tier reconstructors branch
+                    node(groundReconstructor, () -> {
+                        node(advancedReconstructor);
+                    });
 
                     // Ветви конструкторов юнитов (наземный; позже — пауковый и летучий) | Unit factories (ground; spider & air later)
                     node(groundConstructor, () -> {
                         node(photon, () -> {
-                            // Требуется первый реконструктор тира (добавить Research(tier1Reconstructor) после создания) | Requires tier-1 reconstructor
-                            node(bunch, Seq.with(new SectorComplete(impact0039)), () -> {});
+                            node(bunch, Seq.with(
+                                new SectorComplete(impact0039),
+                                new Research(groundReconstructor)
+                            ), () -> {});
                         });
                     });
                 });
