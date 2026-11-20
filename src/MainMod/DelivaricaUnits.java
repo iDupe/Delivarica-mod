@@ -38,7 +38,7 @@ public class DelivaricaUnits {
             accel = 0.08f;
             drag = 0.04f;
             rotateSpeed = 5f;
-            health = 240f;
+            health = 240f; // Собственное ХП корпуса юнита
             armor = 1f;
             hitSize = 11f;
             engineOffset = 6f;
@@ -46,15 +46,16 @@ public class DelivaricaUnits {
             outlineColor = Color.valueOf("36363c");
 
             // Скорость строительства и добычи как у Beta
-            buildSpeed = 1f;
+            buildSpeed = 0.75f;
             mineSpeed = 7f;
             mineTier = 2;
-            itemCapacity = 65;
+            itemCapacity = 40;
 
-            // Круглый щит радиусом 5 клеток (40f), прочностью 1000 HP и замедленным в 2 раза восстановлением
-            abilities.add(new ForceFieldAbility(40f, 0.25f, 1000f, 360f){
+            // Радиус 40f (5 клеток), пассивный реген 1000/900f (1000 HP за 15 сек), прочность 1000f, КД поломки 900f (15 сек)
+            abilities.add(new ForceFieldAbility(40f, 1000f / 900f, 1000f, 900f){
                 float savedShield = 1000f;
-                boolean wasActive = false;
+                float breakTimer = 0f;
+                boolean shieldDeployed = false;
 
                 {
                     sides = 36;
@@ -62,30 +63,67 @@ public class DelivaricaUnits {
 
                 @Override
                 public void update(Unit unit) {
+                    // Если щит был уничтожен — ждём ровно 15 секунд (900 тиков)
+                    if (breakTimer > 0f) {
+                        breakTimer -= Time.delta;
+                        unit.shield = 0f;
+                        shieldDeployed = false;
+                        radiusScale = Mathf.lerpDelta(radiusScale, 0f, 0.08f);
+                        if (alpha > 0f) {
+                            alpha = Math.max(0f, alpha - Time.delta / 10f);
+                        }
+                        if (breakTimer <= 0f) {
+                            savedShield = max; // После 15 сек КД щит снова полон (1000 HP)
+                        }
+                        return;
+                    }
+
                     boolean active = unit.isShooting && !unit.isBuilding() && !unit.mining();
 
                     if (active) {
-                        if (!wasActive) {
+                        // Возвращаем накопленный заряд при раскрытии щита
+                        if (!shieldDeployed) {
                             unit.shield = savedShield;
-                            wasActive = true;
+                            shieldDeployed = true;
                         }
 
                         super.update(unit);
-                        savedShield = unit.shield;
-                    } else {
-                        if (wasActive) {
-                            savedShield = unit.shield;
+
+                        // В развёрнутом виде щит теряет 100 HP за 6 секунд (100 / 360 за тик)
+                        if (unit.shield > 0f) {
+                            unit.shield = Math.max(0f, unit.shield - (regen + 100f / 360f) * Time.delta);
+                        }
+
+                        // Если щит разрядился в ноль или его пробили — запускаем 15-секундный КД
+                        if (unit.shield <= 0f) {
                             unit.shield = 0f;
-                            wasActive = false;
+                            savedShield = 0f;
+                            shieldDeployed = false;
+                            breakTimer = cooldown; // 900 тиков = 15 секунд
+                            Fx.shieldBreak.at(unit.x, unit.y, radius, unit.team.color);
+                        } else {
+                            savedShield = unit.shield;
+                        }
+                    } else {
+                        // Пока купол ещё не сложился до конца — плавно сжимаем его
+                        if (radiusScale > 0.03f) {
+                            radiusScale = Mathf.lerpDelta(radiusScale, 0f, 0.06f);
+                            savedShield = unit.shield;
+                        } else {
+                            // Как только щит полностью сложился — окончательно выключаем и обнуляем его
+                            radiusScale = 0f;
+                            if (shieldDeployed) {
+                                savedShield = unit.shield;
+                                shieldDeployed = false;
+                            }
+                            unit.shield = 0f;
+
+                            // Пассивный реген: 1000 HP за 15 секунд (1000 / 900 за тик)
+                            if (savedShield < max) {
+                                savedShield = Math.min(max, savedShield + regen * Time.delta);
+                            }
                         }
 
-                        // Полностью отключаем щит и защиту, пока ЛКМ не нажата
-                        unit.shield = 0f;
-                        radiusScale = Mathf.lerpDelta(radiusScale, 0f, 0.05f);
-
-                        if (savedShield < max) {
-                            savedShield = Math.min(max, savedShield + regen * Time.delta);
-                        }
                         if (alpha > 0f) {
                             alpha = Math.max(0f, alpha - Time.delta / 10f);
                         }
@@ -115,8 +153,6 @@ public class DelivaricaUnits {
                 }};
             }});
         }};
-
-
 
         // Photon
         photon = new UnitType("photon"){{
