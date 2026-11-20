@@ -11,15 +11,12 @@ import mindustry.gen.Unit;
 import mindustry.gen.UnitEntity;
 import arc.Events;
 import arc.graphics.Color;
-import mindustry.ai.types.BuilderAI;
 import mindustry.ai.types.GroundAI;
 import mindustry.content.Fx;
 import mindustry.entities.bullet.ArtilleryBulletType;
 import mindustry.entities.bullet.BasicBulletType;
-import mindustry.entities.bullet.BulletType;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.gen.MechUnit;
-import mindustry.gen.Sounds;
 import mindustry.graphics.Pal;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
@@ -30,7 +27,6 @@ public class DelivaricaUnits {
 
     public static void load() {
 
-        // Side
         // Side
         side = new UnitType("side"){{
             constructor = UnitEntity::create;
@@ -49,31 +45,46 @@ public class DelivaricaUnits {
             engineSize = 2.5f;
             outlineColor = Color.valueOf("36363c");
 
-            // Характеристики как у Beta
-            buildSpeed = 0.75f;
+            // Скорость строительства и добычи как у Beta
+            buildSpeed = 1f;
             mineSpeed = 7f;
             mineTier = 2;
-            itemCapacity = 40;
+            itemCapacity = 65;
 
-            // Встроенный щит как у Quasar, но управляемый через ЛКМ
-            // Параметры: радиус 24f (6x6 клеток), реген 0.5f/тик, прочность 1000f, перезарядка при поломке 3 сек (180f)
-            abilities.add(new ForceFieldAbility(24f, 0.5f, 1000f, 180f){{
-                sides = 36; // Делаем щит круглым (36 граней вместо 6-угольника; если нужен 6-угольник — уберите эту строку)
-            }
+            // Круглый щит радиусом 5 клеток (40f), прочностью 1000 HP и замедленным в 2 раза восстановлением
+            abilities.add(new ForceFieldAbility(40f, 0.25f, 1000f, 360f){
+                float savedShield = 1000f;
+                boolean wasActive = false;
+
+                {
+                    sides = 36;
+                }
+
                 @Override
                 public void update(Unit unit) {
                     boolean active = unit.isShooting && !unit.isBuilding() && !unit.mining();
 
                     if (active) {
-                        // Запускаем стандартную логику (резкое раскрытие и поглощение пуль)
+                        if (!wasActive) {
+                            unit.shield = savedShield;
+                            wasActive = true;
+                        }
+
                         super.update(unit);
+                        savedShield = unit.shield;
                     } else {
-                        // Если ЛКМ отпущена — медленно сворачиваем щит в 0
+                        if (wasActive) {
+                            savedShield = unit.shield;
+                            unit.shield = 0f;
+                            wasActive = false;
+                        }
+
+                        // Полностью отключаем щит и защиту, пока ЛКМ не нажата
+                        unit.shield = 0f;
                         radiusScale = Mathf.lerpDelta(radiusScale, 0f, 0.05f);
 
-                        // Восстанавливаем щит и тикаем кулдаун поломки в фоне
-                        if (unit.shield < max) {
-                            unit.shield = Math.min(max, unit.shield + regen * Time.delta);
+                        if (savedShield < max) {
+                            savedShield = Math.min(max, savedShield + regen * Time.delta);
                         }
                         if (alpha > 0f) {
                             alpha = Math.max(0f, alpha - Time.delta / 10f);
@@ -82,7 +93,7 @@ public class DelivaricaUnits {
                 }
             });
 
-            // Невидимое оружие-триггер, чтобы при зажатии ЛКМ включался флаг unit.isShooting
+            // Оружие-триггер без урона для отслеживания зажатия ЛКМ
             weapons.add(new Weapon(){{
                 x = 0f;
                 y = 0f;
@@ -104,6 +115,7 @@ public class DelivaricaUnits {
                 }};
             }});
         }};
+
 
 
         // Photon
