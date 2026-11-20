@@ -79,6 +79,7 @@ public class DelivaricaTechTree {
                     });
 
                     // Ветви конструкторов юнитов (наземный; позже — пауковый и летучий) | Unit factories (ground; spider & air later)
+                                        // Ветви конструкторов юнитов (наземный; позже — пауковый и летучий) | Unit factories (ground; spider & air later)
                     node(groundConstructor, () -> {
                         node(photon, () -> {
                             node(bunch, Seq.with(
@@ -86,6 +87,8 @@ public class DelivaricaTechTree {
                                 new Research(groundReconstructor)
                             ), () -> {});
                         });
+
+                        node(scrape);
                     });
                 });
             });

@@ -12,10 +12,12 @@ import mindustry.entities.bullet.ArtilleryBulletType;
 import mindustry.entities.bullet.BasicBulletType;
 import mindustry.entities.bullet.BulletType;
 import mindustry.game.EventType.ClientLoadEvent;
+import mindustry.gen.LegsUnit;
 import mindustry.gen.MechUnit;
 import mindustry.gen.Sounds;
 import mindustry.gen.Unit;
 import mindustry.gen.UnitEntity;
+import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
@@ -23,7 +25,7 @@ import mindustry.type.Weapon;
 public class DelivaricaUnits {
 
     // Юниты мода | Mod units
-    public static UnitType side, photon, photonArmored, bunch, bunchArmored;
+    public static UnitType side, photon, photonArmored, bunch, bunchArmored, scrape;
 
     public static void load() {
         // Юнит ядра | Core unit
@@ -361,6 +363,56 @@ public class DelivaricaUnits {
 
                     hitEffect = Fx.hitBulletColor;
                     despawnEffect = Fx.none;
+                }};
+            }});
+        }};
+
+        // Скрейп | Scrape
+        scrape = new UnitType("scrape") {{
+            constructor = LegsUnit::create;
+            aiController = GroundAI::new;
+
+            flying = false;
+            speed = 0.72f;
+            hitSize = 10f;
+            health = 340f;
+            armor = 2f;
+            rotateSpeed = 4.5f;
+            outlineColor = Color.valueOf("36363c");
+
+            // Параметры паучьих лап | Spider leg parameters
+            legCount = 4;
+            legLength = 9f;
+            legForwardScl = 0.6f;
+            legMoveSpace = 1.4f;
+            hovering = true;
+            allowLegStep = true;
+            groundLayer = Layer.legUnit;
+
+            // Встроенное оружие со слабой круговой ударной волной вокруг себя | Radial shockwave weapon
+            weapons.add(new Weapon(name + "-w") {{
+                x = 0f;
+                y = 0f;
+                mirror = false;
+                reload = 75f;
+                shootCone = 360f;
+                shootSound = Sounds.shootArtillerySmall;
+                ejectEffect = Fx.none;
+
+                bullet = new BasicBulletType(0f, 18f) {{
+                    instantDisappear = true;
+                    lifetime = 1f;
+                    collides = false;
+                    hittable = false;
+                    absorbable = false;
+
+                    // Слабая ударная волна вокруг корпуса | Weak radial shockwave around body
+                    splashDamage = 18f;
+                    splashDamageRadius = 38f;
+                    knockback = 1.5f;
+                    hitEffect = Fx.shockwave;
+                    despawnEffect = Fx.none;
+                    hitColor = Color.valueOf("82fff2");
                 }};
             }});
         }};

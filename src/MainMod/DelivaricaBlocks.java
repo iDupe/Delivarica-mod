@@ -426,6 +426,11 @@ public class DelivaricaBlocks {
                     DelivaricaUnits.photon,
                     60f * 15f,
                     ItemStack.with(DelivaricaItems.chromium, 40, DelivaricaItems.nickel, 35)
+                ),
+                new UnitPlan(
+                    DelivaricaUnits.scrape,
+                    60f * 15f,
+                    ItemStack.with(DelivaricaItems.chromium, 35, DelivaricaItems.nickel, 40)
                 )
             );
         }
