@@ -1,34 +1,33 @@
 package MainMod;
 
-
+import arc.Events;
+import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.util.Time;
 import mindustry.ai.types.BuilderAI;
+import mindustry.ai.types.GroundAI;
+import mindustry.content.Fx;
 import mindustry.entities.abilities.ForceFieldAbility;
+import mindustry.entities.bullet.ArtilleryBulletType;
+import mindustry.entities.bullet.BasicBulletType;
 import mindustry.entities.bullet.BulletType;
+import mindustry.game.EventType.ClientLoadEvent;
+import mindustry.gen.MechUnit;
 import mindustry.gen.Sounds;
 import mindustry.gen.Unit;
 import mindustry.gen.UnitEntity;
-import arc.Events;
-import arc.graphics.Color;
-import mindustry.ai.types.GroundAI;
-import mindustry.content.Fx;
-import mindustry.entities.bullet.ArtilleryBulletType;
-import mindustry.entities.bullet.BasicBulletType;
-import mindustry.game.EventType.ClientLoadEvent;
-import mindustry.gen.MechUnit;
 import mindustry.graphics.Pal;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
 
 public class DelivaricaUnits {
-    // Добавили bunchArmored в список
+
+    // Юниты мода | Mod units
     public static UnitType side, photon, photonArmored, bunch, bunchArmored;
 
     public static void load() {
-
-        // Side
-        side = new UnitType("side"){{
+        // Юнит ядра | Core unit
+        side = new UnitType("side") {{
             constructor = UnitEntity::create;
             aiController = BuilderAI::new;
 
@@ -45,15 +44,15 @@ public class DelivaricaUnits {
             engineSize = 2.5f;
             outlineColor = Color.valueOf("36363c");
 
-            // Скорость строительства и добычи как у Beta
+            // Строительство и добыча | Building and mining
             buildSpeed = 0.75f;
             mineSpeed = 7f;
             mineTier = 2;
             itemCapacity = 40;
 
-            // Радиус 40f (5 клеток), пассивный реген 1000/900f (1000 HP за 15 сек), прочность 1000f, КД поломки 900f (15 сек)
-            abilities.add(new ForceFieldAbility(40f, 1000f / 900f, 1000f, 900f){
-                float savedShield = 1f; // Стартует с 1 HP, чтобы исключить абуз через респавн в ядре
+            // Силовой щит: радиус 40, реген 1000/15с, прочность 1000, КД 15с | Force field: radius 40, regen 1000/15s, max 1000, cooldown 15s
+            abilities.add(new ForceFieldAbility(40f, 1000f / 900f, 1000f, 900f) {
+                float savedShield = 1f; // Старт с 1 HP против абуза респавна | Start with 1 HP to prevent respawn abuse
                 float breakTimer = 0f;
                 float drainTimer = 0f;
                 boolean shieldDeployed = false;
@@ -64,7 +63,7 @@ public class DelivaricaUnits {
 
                 @Override
                 public void update(Unit unit) {
-                    // Если щит был уничтожен — ждём ровно 15 секунд (900 тиков)
+                    // Ожидание перезарядки после пробития (15 сек) | Cooldown wait after shield break (15s)
                     if (breakTimer > 0f) {
                         breakTimer -= Time.delta;
                         unit.shield = 0f;
@@ -91,10 +90,10 @@ public class DelivaricaUnits {
                         super.update(unit);
 
                         if (unit.shield > 0f) {
-                            // Убираем встроенный хил из super.update()
+                            // Компенсация встроенного регена из super.update() | Cancel built-in regen from super.update()
                             unit.shield = Math.max(0f, unit.shield - regen * Time.delta);
 
-                            // Снимаем порцию ХП строго раз в секунду (каждые 60 тиков)
+                            // Расход заряда раз в секунду | Drain shield charge once per second
                             drainTimer += Time.delta;
                             if (drainTimer >= 60f) {
                                 drainTimer -= 60f;
@@ -102,7 +101,7 @@ public class DelivaricaUnits {
                             }
                         }
 
-                        // Если щит разрядился в ноль или его пробили — запускаем 15-секундный КД
+                        // Пробитие или полная разрядка щита | Shield break or full discharge
                         if (unit.shield <= 0f) {
                             unit.shield = 0f;
                             savedShield = 0f;
@@ -116,12 +115,11 @@ public class DelivaricaUnits {
                     } else {
                         drainTimer = 0f;
 
-                        // Пока купол ещё не сложился до конца — плавно сжимаем его
+                        // Плавное сворачивание купола | Smoothly collapse dome
                         if (radiusScale > 0.03f) {
                             radiusScale = Mathf.lerpDelta(radiusScale, 0f, 0.06f);
                             savedShield = unit.shield;
                         } else {
-                            // Как только щит полностью сложился — окончательно выключаем и обнуляем его
                             radiusScale = 0f;
                             if (shieldDeployed) {
                                 savedShield = unit.shield;
@@ -129,7 +127,7 @@ public class DelivaricaUnits {
                             }
                             unit.shield = 0f;
 
-                            // Пассивный реген: 1000 HP за 15 секунд
+                            // Пассивная регенерация в свёрнутом состоянии | Passive regeneration while collapsed
                             if (savedShield < max) {
                                 savedShield = Math.min(max, savedShield + regen * Time.delta);
                             }
@@ -142,8 +140,8 @@ public class DelivaricaUnits {
                 }
             });
 
-            // Оружие-триггер без урона для отслеживания зажатия ЛКМ
-            weapons.add(new Weapon(){{
+            // Оружие-триггер без урона для активации щита | Zero-damage trigger weapon for shield activation
+            weapons.add(new Weapon() {{
                 x = 0f;
                 y = 0f;
                 mirror = false;
@@ -151,7 +149,7 @@ public class DelivaricaUnits {
                 shootSound = Sounds.none;
                 shootCone = 360f;
 
-                bullet = new BulletType(0f, 0f){{
+                bullet = new BulletType(0f, 0f) {{
                     lifetime = 1f;
                     instantDisappear = true;
                     collides = false;
@@ -165,15 +163,13 @@ public class DelivaricaUnits {
             }});
         }};
 
-
-
-        // Photon
-        photon = new UnitType("photon"){{
+        // Фотон (базовый артиллерийский мех) | Photon (base artillery mech)
+        photon = new UnitType("photon") {{
             constructor = MechUnit::create;
             aiController = GroundAI::new;
 
             flying = false;
-            speed = 0.60f; // Скорость понижена (было 0.75f)
+            speed = 0.60f;
             hitSize = 11f;
             health = 420f;
             armor = 2f;
@@ -185,7 +181,7 @@ public class DelivaricaUnits {
             mechSideSway = 0.35f;
             mechStepParticles = true;
 
-            weapons.add(new Weapon(name + "-w"){{
+            weapons.add(new Weapon(name + "-w") {{
                 reload = 35f;
                 x = 4.5f;
                 y = 0f;
@@ -196,15 +192,15 @@ public class DelivaricaUnits {
                 rotate = false;
                 ejectEffect = Fx.casing1;
 
-                bullet = new ArtilleryBulletType(3f, 12, "shell"){{ // Урон понижен до 12
+                bullet = new ArtilleryBulletType(3f, 12, "shell") {{
                     hitEffect = Fx.flakExplosion;
                     knockback = 0.6f;
-                    lifetime = 48f; // 3 * 48 = 144f (ровно 18 блоков)
+                    lifetime = 48f;
                     width = height = 6.5f;
                     collides = true;
                     collidesTiles = true;
                     splashDamageRadius = 14f;
-                    splashDamage = 14f; // Урон по площади понижен до 14
+                    splashDamage = 14f;
                     homingPower = 0.08f;
                     homingRange = 50f;
                     backColor = Pal.gray;
@@ -214,15 +210,15 @@ public class DelivaricaUnits {
             }});
         }};
 
-        // Armored photon
-        photonArmored = new UnitType("photon-armored"){{
+        // Бронированный Фотон | Armored Photon
+        photonArmored = new UnitType("photon-armored") {{
             constructor = MechUnit::create;
             aiController = GroundAI::new;
 
             flying = false;
-            speed = 0.48f; // Скорость понижена (было 0.60f)
+            speed = 0.48f;
             hitSize = 11f;
-            health = 620f; // 420 + 200 HP
+            health = 620f;
             armor = 5f;
             rotateSpeed = 4f;
             outlineColor = Color.valueOf("36363c");
@@ -232,7 +228,7 @@ public class DelivaricaUnits {
             mechSideSway = 0.35f;
             mechStepParticles = true;
 
-            weapons.add(new Weapon(photon.name + "-w"){{
+            weapons.add(new Weapon(photon.name + "-w") {{
                 reload = 35f;
                 x = 4.5f;
                 y = 0f;
@@ -243,15 +239,15 @@ public class DelivaricaUnits {
                 rotate = false;
                 ejectEffect = Fx.casing1;
 
-                bullet = new ArtilleryBulletType(3f, 12, "shell"){{ // Урон понижен до 12
+                bullet = new ArtilleryBulletType(3f, 12, "shell") {{
                     hitEffect = Fx.flakExplosion;
                     knockback = 0.6f;
-                    lifetime = 48f; // 3 * 48 = 144f (ровно 18 блоков)
+                    lifetime = 48f;
                     width = height = 6.5f;
                     collides = true;
                     collidesTiles = true;
                     splashDamageRadius = 14f;
-                    splashDamage = 14f; // Урон по площади понижен до 14
+                    splashDamage = 14f;
                     homingPower = 0.08f;
                     homingRange = 50f;
                     backColor = Pal.gray;
@@ -261,8 +257,8 @@ public class DelivaricaUnits {
             }});
         }};
 
-        // Bunch
-        bunch = new UnitType("bunch"){{
+        // Банч (базовый штурмовой мех) | Bunch (base assault mech)
+        bunch = new UnitType("bunch") {{
             constructor = MechUnit::create;
             aiController = GroundAI::new;
 
@@ -279,10 +275,8 @@ public class DelivaricaUnits {
             mechSideSway = 0.4f;
             mechStepParticles = true;
 
-            // Пушка от обычного банча
-            weapons.add(new Weapon(this.name + "-w"){{
-                reload = 60f; // 1 выстрел в секунду 
-                
+            weapons.add(new Weapon(this.name + "-w") {{
+                reload = 60f;
                 x = 6.5f;
                 y = 0f;
                 top = false;
@@ -292,20 +286,20 @@ public class DelivaricaUnits {
                 rotate = false;
                 ejectEffect = Fx.casing2;
 
-                // НАСТРОЙКИ ДРОБИ
-                inaccuracy = 12f;       // Разброс
-                shoot.shots = 5;        // Количество дробинок
-                shoot.shotDelay = 0f;   
+                // Параметры дроби | Buckshot parameters
+                inaccuracy = 12f;
+                shoot.shots = 5;
+                shoot.shotDelay = 0f;
 
-                bullet = new BasicBulletType(5f, 25){{ 
+                bullet = new BasicBulletType(5f, 25) {{
                     width = 5f;
                     height = 7f;
-                    lifetime = 18f; 
-                    
-                    trailLength = 15;           
-                    trailWidth = 2f;            
-                    trailColor = Color.gray;    
-                    
+                    lifetime = 18f;
+
+                    trailLength = 15;
+                    trailWidth = 2f;
+                    trailColor = Color.gray;
+
                     backColor = Color.darkGray;
                     frontColor = Color.lightGray;
 
@@ -315,17 +309,17 @@ public class DelivaricaUnits {
             }});
         }};
 
-        // Armored Bunch (Твой новый юнит)
-        bunchArmored = new UnitType("bunch-armored"){{
+        // Бронированный Банч | Armored Bunch
+        bunchArmored = new UnitType("bunch-armored") {{
             constructor = MechUnit::create;
             aiController = GroundAI::new;
 
             flying = false;
-            speed = 0.45f;       // Чуть медленнее обычного (было 0.55f)
-            hitSize = 12f;       // Такой же размер
-            health = 1350f;      // Значительно больше ХП (было 950f)
-            armor = 10f;         // Толще броня (было 6f)
-            rotateSpeed = 2.5f;  // Медленнее поворачивается (было 3f)
+            speed = 0.45f;
+            hitSize = 12f;
+            health = 1350f;
+            armor = 10f;
+            rotateSpeed = 2.5f;
             outlineColor = Color.valueOf("36363c");
 
             mechStride = 5.5f;
@@ -333,11 +327,8 @@ public class DelivaricaUnits {
             mechSideSway = 0.4f;
             mechStepParticles = true;
 
-            // Используем пушку от обычного банча
-            weapons.add(new Weapon(bunch.name + "-w"){{
-                reload = 60f; // 1 выстрел в секунду (60 тиков)
-                
-                // Твои родные координаты и слои (НЕ ТРОГАЕМ)
+            weapons.add(new Weapon(bunch.name + "-w") {{
+                reload = 60f;
                 x = 6.5f;
                 y = 0f;
                 top = false;
@@ -347,37 +338,35 @@ public class DelivaricaUnits {
                 rotate = false;
                 ejectEffect = Fx.casing2;
 
-                // --- НАСТРОЙКИ ДРОБИ ---
-                inaccuracy = 12f;       // Разброс (пишется напрямую)
-                shoot.shots = 5;        // Количество дробинок (пишется через shoot)
-                shoot.shotDelay = 0f;   // Стрелять всеми разом
+                // Параметры дроби | Buckshot parameters
+                inaccuracy = 12f;
+                shoot.shots = 5;
+                shoot.shotDelay = 0f;
 
-                bullet = new BasicBulletType(5f, 25){{ 
+                bullet = new BasicBulletType(5f, 25) {{
                     width = 5f;
                     height = 7f;
-                    lifetime = 18f; 
-                    
-                    trailLength = 15;           
-                    trailWidth = 2f;            
-                    trailColor = Color.gray;    
-                    
+                    lifetime = 18f;
+
+                    trailLength = 15;
+                    trailWidth = 2f;
+                    trailColor = Color.gray;
+
                     backColor = Color.darkGray;
-                    frontColor = Color.lightGray; 
-                    
+                    frontColor = Color.lightGray;
+
                     hitEffect = Fx.hitBulletColor;
                     despawnEffect = Fx.none;
                 }};
             }});
         }};
 
-        // Подтягиваем ноги/базу/ячейки для армированных версий
+        // Наследование спрайтов для бронированных версий | Inherit sprites for armored variants
         Events.on(ClientLoadEvent.class, e -> {
-            // Для фотона
             photonArmored.legRegion = photon.legRegion;
             photonArmored.baseRegion = photon.baseRegion;
             photonArmored.cellRegion = photon.cellRegion;
-            
-            // Для банча
+
             bunchArmored.legRegion = bunch.legRegion;
             bunchArmored.baseRegion = bunch.baseRegion;
             bunchArmored.cellRegion = bunch.cellRegion;

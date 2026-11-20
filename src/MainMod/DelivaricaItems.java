@@ -4,11 +4,15 @@ import arc.graphics.Color;
 import mindustry.type.Item;
 
 public class DelivaricaItems {
-    // Ссылки на предметы для использования в других классах
-    public static Item chromium, sulfur, nickel, tantalum, phosphore, ramtanium, lustrite;
+
+    // Сырьё и минералы | Raw resources and minerals
+    public static Item chromium, sulfur, nickel, tantalum, phosphore;
+
+    // Сплавы и композиты | Alloys and composites
+    public static Item ramtanium, lustrite;
 
     public static void load() {
-        
+        // Сырьё и минералы | Raw resources and minerals
         chromium = new Item("chromium", Color.valueOf("948f99")) {{
             localizedName = "Хром";
             hardness = 2;
@@ -42,6 +46,7 @@ public class DelivaricaItems {
             cost = 1.5f;
         }};
 
+        // Сплавы и композиты | Alloys and composites
         ramtanium = new Item("ramtanium", Color.valueOf("b8c6ae")) {{
             localizedName = "Рамтан";
             hardness = 2;
@@ -54,6 +59,5 @@ public class DelivaricaItems {
             hardness = 3;
             cost = 2.5f;
         }};
-        
     }
 }
