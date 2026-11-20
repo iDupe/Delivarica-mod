@@ -21,7 +21,6 @@ public class Delivarica extends Mod {
     public void loadContent() {
 
         DelivaricaStatusEffects.load();
-        DelivaricaTeams.load();
         DelivaricaItems.load();
         DelivaricaUnits.load();
         DelivaricaBlocks.load();
