@@ -1,15 +1,25 @@
 package MainMod;
 
+
+import arc.math.Mathf;
+import arc.util.Time;
+import mindustry.ai.types.BuilderAI;
+import mindustry.entities.abilities.ForceFieldAbility;
+import mindustry.entities.bullet.BulletType;
+import mindustry.gen.Sounds;
+import mindustry.gen.Unit;
+import mindustry.gen.UnitEntity;
 import arc.Events;
 import arc.graphics.Color;
-import mindustry.ai.types.FlyingAI;
+import mindustry.ai.types.BuilderAI;
 import mindustry.ai.types.GroundAI;
 import mindustry.content.Fx;
 import mindustry.entities.bullet.ArtilleryBulletType;
 import mindustry.entities.bullet.BasicBulletType;
+import mindustry.entities.bullet.BulletType;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.gen.MechUnit;
-import mindustry.gen.UnitEntity;
+import mindustry.gen.Sounds;
 import mindustry.graphics.Pal;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
@@ -21,11 +31,13 @@ public class DelivaricaUnits {
     public static void load() {
 
         // Side
+        // Side
         side = new UnitType("side"){{
             constructor = UnitEntity::create;
-            aiController = FlyingAI::new;
+            aiController = BuilderAI::new;
 
             flying = true;
+            isEnemy = false;
             speed = 2.6f;
             accel = 0.08f;
             drag = 0.04f;
@@ -37,22 +49,62 @@ public class DelivaricaUnits {
             engineSize = 2.5f;
             outlineColor = Color.valueOf("36363c");
 
-            weapons.add(new Weapon(name + "-w"){{
-                reload = 22f;
-                x = 4f;
-                y = 1f;
-                top = false;
-                layerOffset = -0.01f;
-                mirror = true;
-                ejectEffect = Fx.casing1;
+            // Характеристики как у Beta
+            buildSpeed = 0.75f;
+            mineSpeed = 7f;
+            mineTier = 2;
+            itemCapacity = 40;
 
-                bullet = new BasicBulletType(4.5f, 18){{
-                    width = 7f;
-                    height = 9f;
-                    lifetime = 35f;
+            // Встроенный щит как у Quasar, но управляемый через ЛКМ
+            // Параметры: радиус 24f (6x6 клеток), реген 0.5f/тик, прочность 1000f, перезарядка при поломке 3 сек (180f)
+            abilities.add(new ForceFieldAbility(24f, 0.5f, 1000f, 180f){{
+                sides = 36; // Делаем щит круглым (36 граней вместо 6-угольника; если нужен 6-угольник — уберите эту строку)
+            }
+                @Override
+                public void update(Unit unit) {
+                    boolean active = unit.isShooting && !unit.isBuilding() && !unit.mining();
+
+                    if (active) {
+                        // Запускаем стандартную логику (резкое раскрытие и поглощение пуль)
+                        super.update(unit);
+                    } else {
+                        // Если ЛКМ отпущена — медленно сворачиваем щит в 0
+                        radiusScale = Mathf.lerpDelta(radiusScale, 0f, 0.05f);
+
+                        // Восстанавливаем щит и тикаем кулдаун поломки в фоне
+                        if (unit.shield < max) {
+                            unit.shield = Math.min(max, unit.shield + regen * Time.delta);
+                        }
+                        if (alpha > 0f) {
+                            alpha = Math.max(0f, alpha - Time.delta / 10f);
+                        }
+                    }
+                }
+            });
+
+            // Невидимое оружие-триггер, чтобы при зажатии ЛКМ включался флаг unit.isShooting
+            weapons.add(new Weapon(){{
+                x = 0f;
+                y = 0f;
+                mirror = false;
+                reload = 1f;
+                shootSound = Sounds.none;
+                shootCone = 360f;
+
+                bullet = new BulletType(0f, 0f){{
+                    lifetime = 1f;
+                    instantDisappear = true;
+                    collides = false;
+                    hittable = false;
+                    absorbable = false;
+                    hitEffect = Fx.none;
+                    despawnEffect = Fx.none;
+                    shootEffect = Fx.none;
+                    smokeEffect = Fx.none;
                 }};
             }});
         }};
+
 
         // Photon
         photon = new UnitType("photon"){{
@@ -195,10 +247,7 @@ public class DelivaricaUnits {
                     
                     backColor = Color.darkGray;
                     frontColor = Color.lightGray;
-                    
-                    homingPower = 0.15f;  
-                    homingRange = 80f;    
-                    
+
                     hitEffect = Fx.hitBulletColor;
                     despawnEffect = Fx.none;
                 }};
@@ -252,10 +301,7 @@ public class DelivaricaUnits {
                     trailColor = Color.gray;    
                     
                     backColor = Color.darkGray;
-                    frontColor = Color.lightGray;
-                    
-                    homingPower = 0.15f;  
-                    homingRange = 80f;    
+                    frontColor = Color.lightGray; 
                     
                     hitEffect = Fx.hitBulletColor;
                     despawnEffect = Fx.none;
