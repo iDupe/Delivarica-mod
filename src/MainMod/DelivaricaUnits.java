@@ -38,7 +38,7 @@ public class DelivaricaUnits {
             accel = 0.08f;
             drag = 0.04f;
             rotateSpeed = 5f;
-            health = 240f; // Собственное ХП корпуса юнита
+            health = 240f;
             armor = 1f;
             hitSize = 11f;
             engineOffset = 6f;
@@ -53,8 +53,9 @@ public class DelivaricaUnits {
 
             // Радиус 40f (5 клеток), пассивный реген 1000/900f (1000 HP за 15 сек), прочность 1000f, КД поломки 900f (15 сек)
             abilities.add(new ForceFieldAbility(40f, 1000f / 900f, 1000f, 900f){
-                float savedShield = 1000f;
+                float savedShield = 1f; // Стартует с 1 HP, чтобы исключить абуз через респавн в ядре
                 float breakTimer = 0f;
+                float drainTimer = 0f;
                 boolean shieldDeployed = false;
 
                 {
@@ -68,12 +69,13 @@ public class DelivaricaUnits {
                         breakTimer -= Time.delta;
                         unit.shield = 0f;
                         shieldDeployed = false;
+                        drainTimer = 0f;
                         radiusScale = Mathf.lerpDelta(radiusScale, 0f, 0.08f);
                         if (alpha > 0f) {
                             alpha = Math.max(0f, alpha - Time.delta / 10f);
                         }
                         if (breakTimer <= 0f) {
-                            savedShield = max; // После 15 сек КД щит снова полон (1000 HP)
+                            savedShield = max;
                         }
                         return;
                     }
@@ -81,7 +83,6 @@ public class DelivaricaUnits {
                     boolean active = unit.isShooting && !unit.isBuilding() && !unit.mining();
 
                     if (active) {
-                        // Возвращаем накопленный заряд при раскрытии щита
                         if (!shieldDeployed) {
                             unit.shield = savedShield;
                             shieldDeployed = true;
@@ -89,9 +90,16 @@ public class DelivaricaUnits {
 
                         super.update(unit);
 
-                        // В развёрнутом виде щит теряет 100 HP за 6 секунд (100 / 360 за тик)
                         if (unit.shield > 0f) {
-                            unit.shield = Math.max(0f, unit.shield - (regen + 100f / 360f) * Time.delta);
+                            // Убираем встроенный хил из super.update()
+                            unit.shield = Math.max(0f, unit.shield - regen * Time.delta);
+
+                            // Снимаем порцию ХП строго раз в секунду (каждые 60 тиков)
+                            drainTimer += Time.delta;
+                            if (drainTimer >= 60f) {
+                                drainTimer -= 60f;
+                                unit.shield = Math.max(0f, unit.shield - (100f / 6f));
+                            }
                         }
 
                         // Если щит разрядился в ноль или его пробили — запускаем 15-секундный КД
@@ -99,12 +107,15 @@ public class DelivaricaUnits {
                             unit.shield = 0f;
                             savedShield = 0f;
                             shieldDeployed = false;
-                            breakTimer = cooldown; // 900 тиков = 15 секунд
+                            drainTimer = 0f;
+                            breakTimer = cooldown;
                             Fx.shieldBreak.at(unit.x, unit.y, radius, unit.team.color);
                         } else {
                             savedShield = unit.shield;
                         }
                     } else {
+                        drainTimer = 0f;
+
                         // Пока купол ещё не сложился до конца — плавно сжимаем его
                         if (radiusScale > 0.03f) {
                             radiusScale = Mathf.lerpDelta(radiusScale, 0f, 0.06f);
@@ -118,7 +129,7 @@ public class DelivaricaUnits {
                             }
                             unit.shield = 0f;
 
-                            // Пассивный реген: 1000 HP за 15 секунд (1000 / 900 за тик)
+                            // Пассивный реген: 1000 HP за 15 секунд
                             if (savedShield < max) {
                                 savedShield = Math.min(max, savedShield + regen * Time.delta);
                             }
@@ -153,6 +164,8 @@ public class DelivaricaUnits {
                 }};
             }});
         }};
+
+
 
         // Photon
         photon = new UnitType("photon"){{
