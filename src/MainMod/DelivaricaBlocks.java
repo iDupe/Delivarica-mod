@@ -282,7 +282,7 @@ public class DelivaricaBlocks {
             requirements(Category.effect, ItemStack.with(Items.copper, 1000, Items.lead, 800));
             alwaysUnlocked = true;
             isFirstTier = true;
-            unitType = UnitTypes.alpha;
+            unitType = DelivaricaUnits.side;
             health = 4200;
             itemCapacity = 2000;
             size = 4;
@@ -294,7 +294,7 @@ public class DelivaricaBlocks {
             requirements(Category.effect, ItemStack.with(Items.copper, 1000, Items.lead, 800));
             alwaysUnlocked = true;
             isFirstTier = true;
-            unitType = UnitTypes.alpha;
+            unitType = DelivaricaUnits.side;
             health = 2400;
             itemCapacity = 1000;
             size = 3;
