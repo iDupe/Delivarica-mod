@@ -88,8 +88,9 @@ public class DelivaricaBlocks {
 
     // Сборщики и фабрики | Constructors and factories
     public static Constructor basicComponentConstructor, basicCargoConstructor;
-    public static Reconstructor basicUnitAmplifier;
+    public static Reconstructor basicUnitAmplifier, groundReconstructor, advancedReconstructor;
     public static UnitFactory groundConstructor;
+
 
     // Предметная логистика | Item distribution
     public static Duct inertialDuct;
@@ -366,6 +367,13 @@ public class DelivaricaBlocks {
             maxBlockSize = 2;
             buildSpeed = 0.6f;
             filter = Seq.with(chromiumWall, chromiumWallBig);
+        }
+
+        @Override
+        public void load() {
+            super.load();
+            inRegion = arc.Core.atlas.find("delivarica-mod-unit-un");
+            outRegion = arc.Core.atlas.find("delivarica-mod-unit-out");
         }};
 
         basicCargoConstructor = new Constructor("basic-cargo-constructor") {{
@@ -376,6 +384,13 @@ public class DelivaricaBlocks {
             maxBlockSize = 3;
             buildSpeed = 0.35f;
             filter = Seq.with(mechanicalDrill);
+        }
+
+        @Override
+        public void load() {
+            super.load();
+            inRegion = arc.Core.atlas.find("delivarica-mod-unit-un");
+            outRegion = arc.Core.atlas.find("delivarica-mod-unit-out");
         }};
 
         basicUnitAmplifier = new Reconstructor("basic-unit-amplifier") {{
@@ -389,6 +404,13 @@ public class DelivaricaBlocks {
                 new UnitType[]{DelivaricaUnits.photon, DelivaricaUnits.photonArmored},
                 new UnitType[]{DelivaricaUnits.bunch, DelivaricaUnits.bunchArmored}
             );
+        }
+
+        @Override
+        public void load() {
+            super.load();
+            inRegion = arc.Core.atlas.find("delivarica-mod-unit-un");
+            outRegion = arc.Core.atlas.find("delivarica-mod-unit-out");
         }};
 
         groundConstructor = new UnitFactory("ground-constructor") {{
@@ -411,8 +433,49 @@ public class DelivaricaBlocks {
         @Override
         public void load() {
             super.load();
-            // Спрайт выхода от basic-cargo-constructor | Output sprite from basic-cargo-constructor
-            outRegion = arc.Core.atlas.find("delivarica-mod-basic-cargo-constructor-out");
+            outRegion = arc.Core.atlas.find("delivarica-mod-unit-out");
+        }};
+
+        groundReconstructor = new Reconstructor("ground-reconstructor") {{
+            requirements(Category.units, ItemStack.with(
+                DelivaricaItems.chromium, 120,
+                DelivaricaItems.nickel, 80
+            ));
+            size = 3;
+            consumePower(2.5f);
+            consumeItems(ItemStack.with(
+                DelivaricaItems.tantalum, 30,
+                DelivaricaItems.nickel, 40
+            ));
+            constructTime = 60f * 15f;
+
+            upgrades.addAll(
+                new UnitType[]{DelivaricaUnits.photon, DelivaricaUnits.bunch}
+            );
+        }
+
+        @Override
+        public void load() {
+            super.load();
+            inRegion = arc.Core.atlas.find("delivarica-mod-unit-un");
+            outRegion = arc.Core.atlas.find("delivarica-mod-unit-out");
+        }};
+
+        advancedReconstructor = new Reconstructor("advanced-reconstructor") {{
+            requirements(Category.units, ItemStack.with(
+                DelivaricaItems.chromium, 300,
+                DelivaricaItems.ramtanium, 150,
+                DelivaricaItems.lustrite, 80
+            ));
+            size = 5;
+            consumePower(5f);
+            consumeItems(ItemStack.with(
+                DelivaricaItems.ramtanium, 60,
+                DelivaricaItems.lustrite, 40
+            ));
+            constructTime = 60f * 25f;
+
+            // Использует собственные спрайты advanced-reconstructor-in / advanced-reconstructor-out | Uses its own in/out sprites
         }};
 
         // Энергетика | Power
