@@ -223,6 +223,8 @@ public class DelivaricaUnits {
             rotateSpeed = 4f;
             outlineColor = Color.valueOf("36363c");
 
+            alwaysUnlocked = true;
+
             mechStride = 4.2f;
             mechFrontSway = 0.25f;
             mechSideSway = 0.35f;
@@ -321,6 +323,8 @@ public class DelivaricaUnits {
             armor = 10f;
             rotateSpeed = 2.5f;
             outlineColor = Color.valueOf("36363c");
+
+            alwaysUnlocked = true;
 
             mechStride = 5.5f;
             mechFrontSway = 0.3f;

@@ -30,6 +30,8 @@ public class Delivarica extends Mod {
         gertat = new Gertat();
         delivia = new Delivia();
 
+        DelivaricaTechTree.load(); 
+
         // Палитра поверхностных блоков для астероидов | Surface block palette for asteroids
         Block[] tints = {
             DelivaricaBlocks.redSand,
