@@ -6,7 +6,6 @@ import arc.struct.Seq;
 import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.content.Liquids;
-import mindustry.content.UnitTypes;
 import mindustry.entities.bullet.BasicBulletType;
 
 import mindustry.entities.part.RegionPart;
@@ -605,8 +604,6 @@ public class DelivaricaBlocks {
             rotateSpeed = 4f;
             shootSound = Sounds.shootSpectre;
 
-            targetAir = false;
-
             shoot = new ShootAlternate(){{
                 spread = 3.5f;
             }};
@@ -655,6 +652,8 @@ public class DelivaricaBlocks {
             rotateSpeed = 5f;
             shootSound = Sounds.shootArtillerySmall;
             ammoPerShot = 2;
+
+            targetAir = false;
 
             shoot.shots = 5;
             shoot.shotDelay = 0f;
