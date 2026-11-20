@@ -387,7 +387,7 @@ public class DelivaricaBlocks {
                 new UnitPlan(
                     DelivaricaUnits.photon,
                     60f * 15f,
-                    ItemStack.with(DelivaricaItems.chromium, 15, DelivaricaItems.nickel, 10)
+                    ItemStack.with(DelivaricaItems.chromium, 40, DelivaricaItems.nickel, 35)
                 )
             );
         }
@@ -604,6 +604,8 @@ public class DelivaricaBlocks {
             rotateSpeed = 4f;
             shootSound = Sounds.shootSpectre;
 
+            targetAir = false; // Бьёт только по наземке
+
             shoot = new ShootAlternate(){{
                 spread = 3.5f;
             }};
@@ -653,8 +655,6 @@ public class DelivaricaBlocks {
             shootSound = Sounds.shootArtillerySmall;
             ammoPerShot = 2;
 
-            targetAir = false;
-
             shoot.shots = 5;
             shoot.shotDelay = 0f;
             inaccuracy = 12f;
@@ -672,7 +672,7 @@ public class DelivaricaBlocks {
                     frontColor = Color.white;
                     hitEffect = Fx.hitBulletColor;
                     despawnEffect = Fx.none;
-                    ammoMultiplier = 4f; // Умножено на 2 (было 2f)
+                    ammoMultiplier = 4f;
                 }},
 
                 DelivaricaItems.sulfur, new BasicBulletType(5f, 15){{
