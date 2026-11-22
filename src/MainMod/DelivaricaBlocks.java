@@ -1,5 +1,9 @@
 package MainMod;
 
+import MainMod.Blocks.RecipeCrafter;
+import MainMod.Blocks.RecipeCrafter.CraftRecipe;
+import mindustry.type.LiquidStack;
+import mindustry.world.draw.DrawLiquidRegion;
 import MainMod.Blocks.xNode;
 import arc.graphics.Color;
 import arc.math.Interp;
@@ -45,13 +49,17 @@ import mindustry.world.draw.DrawParticles;
 import mindustry.world.draw.DrawRegion;
 import mindustry.world.draw.DrawTurret;
 import mindustry.world.meta.Attribute;
+import mindustry.world.blocks.liquid.Conduit;
+import mindustry.world.blocks.production.Pump;
+import mindustry.world.blocks.liquid.LiquidJunction;
 
 public class DelivaricaBlocks {
 
     // Покрытия пола | Floor tiles
     public static Floor
         redSand, sandrock, obsidian, rindit, smoothRindit,
-        drangite, whiteIce, letrite, letriteCrush, whiteSnow;
+        drangite, whiteIce, letrite, letriteCrush, whiteSnow,
+        avrite, avriteCrush, avriteBrom, bromFloor, bromDeep;
 
     // Природные стены | Natural walls
     public static StaticWall
@@ -61,36 +69,55 @@ public class DelivaricaBlocks {
         drangiteWall, drangiteWallLarge,
         whiteIceWall, whiteIceWallLarge,
         letriteWall, letriteWallLarge,
-        whiteSnowWall, whiteSnowWallLarge;
+        whiteSnowWall, whiteSnowWallLarge,
+        avriteWall, avriteWallLarge,
+        redSandWall, redSandWallLarge;
 
     // Высокие объекты и гейзеры | Tall blocks and vents
-    public static TallBlock phosphoriteCubes, neotiteCluster, rinditColumn;
-    public static SteamVent obsidianVent;
+    public static TallBlock 
+        phosphoriteCubes, neotiteCluster, rinditColumn;
+    public static SteamVent 
+        obsidianVent;
 
     // Декоративные валуны | Decorative boulders
-    public static Prop obsidianBoulder, rinditBoulder, sandrockBoulder, drangiteBoulder, letriteBoulder;
+    public static Prop
+        obsidianBoulder, rinditBoulder,
+        sandrockBoulder, drangiteBoulder,
+        letriteBoulder, avriteBoulder;
 
     // Руды | Ores
-    public static OreBlock oreChromium, oreNickel;
+    public static OreBlock
+        oreChromium, oreNickel,
+        oreAvritite, oreBromium;
 
     // Ядра | Cores
-    public static CoreBlock coreReset, coreOff;
+    public static CoreBlock
+        coreReset, coreOff;
 
     // Защитные стены | Defensive walls
-    public static Wall chromiumWall, chromiumWallBig;
+    public static Wall
+        chromiumWall, chromiumWallBig;
 
     // Буры | Drills
-    public static Drill mechanicalDrill;
+    public static Drill
+        mechanicalDrill;
 
     // Грузовые конвейеры | Payload conveyors
-    public static PayloadConveyor inertialFreightConveyor;
-    public static PayloadRouter inertialFreightRouter;
+    public static PayloadConveyor 
+        inertialFreightConveyor;
+
+    public static PayloadRouter 
+        inertialFreightRouter;
 
     // Сборщики и фабрики | Constructors and factories
-    public static Constructor basicComponentConstructor, basicCargoConstructor;
-    public static Reconstructor basicUnitAmplifier, groundReconstructor, advancedReconstructor;
-    public static UnitFactory groundConstructor;
-
+    public static Constructor
+        basicComponentConstructor, 
+        basicCargoConstructor;
+    public static Reconstructor 
+        basicUnitAmplifier, groundReconstructor,
+        spiderReconstructor, advancedReconstructor;
+    public static UnitFactory 
+        groundConstructor, spiderConstructor;
 
     // Предметная логистика | Item distribution
     public static Duct inertialDuct;
@@ -101,17 +128,24 @@ public class DelivaricaBlocks {
     public static OverflowGate inertialUnderflowGate;
 
     // Жидкостная логистика | Liquid distribution
-    public static LiquidRouter liquiTankOne;
+    public static LiquidRouter liquiTankOne, liquidRouter;
+    public static LiquidJunction liquidJunction;
+    public static Conduit liquidDuct;
+    public static Pump basicPump;
+
 
     // Энергетика | Power
     public static ThermalGenerator mawTurbine;
     public static xNode xNode;
 
     // Производство | Production
-    public static GenericCrafter ramtaniumSmelter, lustriteMixer;
+    public static GenericCrafter 
+        ramtaniumSmelter, lustriteMixer;
+    public static RecipeCrafter heavyCleaner;
 
     // Турели | Turrets
-    public static ItemTurret range, hawk, concussion;
+    public static ItemTurret 
+        range, hawk, concussion;
 
     // Кастомный маршрутизатор каналов | Custom duct router
     public static class InertialDuctRouter extends DuctRouter {
@@ -127,12 +161,22 @@ public class DelivaricaBlocks {
     }
 
     public static void load() {
-        // Окружение: песок и песчаник | Environment: sand and sandrock
+        // Окружение: красный песок | Environment: redsand
         redSand = new Floor("redsand-floor") {{
             variants = 3;
             mapColor = Color.valueOf("6e4535");
         }};
 
+        redSandWall = new StaticWall("red-sand-wall") {{
+            variants = 2;
+            mapColor = Color.valueOf("c97b5b");
+        }};
+        redSandWallLarge = new StaticWall("red-sand-wall-large") {{
+            variants = 1;
+            mapColor = Color.valueOf("c97b5b");
+        }};
+
+        // Окружение: песчаник | Environment: sandrock
         sandrock = new Floor("sandrock-floor") {{
             variants = 3;
             mapColor = Color.valueOf("7d7065");
@@ -278,6 +322,58 @@ public class DelivaricaBlocks {
             variants = 2;
         }};
 
+        // Окружение: аврит | Environment: avrite
+        avrite = new Floor("avrite-floor") {{
+            variants = 7;
+            mapColor = Color.valueOf("8f947c");
+        }};
+        avriteCrush = new Floor("avrite-floor-crush") {{
+            variants = 4;
+            itemDrop = DelivaricaItems.avritite;
+            mapColor = Color.valueOf("828770");
+        }};
+        avriteBrom = new Floor("avrite-floor-brom") {{
+            variants = 3;
+            liquidDrop = DelivaricaLiquids.bromiumAcid;
+            liquidMultiplier = 0.5f;
+            mapColor = Color.valueOf("a68d76");
+        }};
+        avriteWall = new StaticWall("avrite-wall") {{
+            variants = 2;
+            mapColor = Color.valueOf("8f947c");
+        }};
+        avriteWallLarge = new StaticWall("avrite-wall-large") {{
+            variants = 1;
+            mapColor = Color.valueOf("8f947c");
+        }};
+        avriteBoulder = new Prop("avrite-boulder") {{
+            variants = 2;
+        }};
+
+        // Окружение: бром | Environment: brom
+        bromFloor = new Floor("brom-floor") {{
+            variants = 2;
+            isLiquid = true;
+            liquidDrop = DelivaricaLiquids.bromiumAcid;
+            liquidMultiplier = 1f;
+            speedMultiplier = 0.65f;
+            drownTime = 0f;
+            statusDuration = 120f;
+            mapColor = Color.valueOf("c48a6c");
+        }};
+
+        bromDeep = new Floor("brom-deep") {{
+            variants = 2;
+            isLiquid = true;
+            liquidDrop = DelivaricaLiquids.bromiumAcid;
+            liquidMultiplier = 1.5f;
+            speedMultiplier = 0.45f;
+            drownTime = 300f;
+            statusDuration = 180f;
+            mapColor = Color.valueOf("a86d51");
+        }};
+
+
         // Руды | Ores
         oreChromium = new OreBlock("chromium-ore", DelivaricaItems.chromium) {{
             variants = 3;
@@ -285,7 +381,6 @@ public class DelivaricaBlocks {
             oreThreshold = 0.81f;
             oreScale = 23.47f;
         }};
-
         oreNickel = new OreBlock("nickel-ore", DelivaricaItems.nickel) {{
             variants = 3;
             oreDefault = true;
@@ -424,13 +519,33 @@ public class DelivaricaBlocks {
             plans = Seq.with(
                 new UnitPlan(
                     DelivaricaUnits.photon,
-                    60f * 15f,
+                    60f * 30f,
                     ItemStack.with(DelivaricaItems.chromium, 40, DelivaricaItems.nickel, 35)
-                ),
+                )
+            );
+        }
+
+        @Override
+        public void load() {
+            super.load();
+            inRegion = arc.Core.atlas.find("delivarica-mod-unit-un");
+            outRegion = arc.Core.atlas.find("delivarica-mod-unit-out");
+        }};
+
+        spiderConstructor = new UnitFactory("spider-constructor") {{
+            requirements(Category.units, ItemStack.with(
+                DelivaricaItems.chromium, 120,
+                DelivaricaItems.nickel, 80,
+                DelivaricaItems.lustrite, 20
+            ));
+            size = 3;
+            consumePower(2f);
+
+            plans = Seq.with(
                 new UnitPlan(
                     DelivaricaUnits.scrape,
-                    60f * 15f,
-                    ItemStack.with(DelivaricaItems.chromium, 35, DelivaricaItems.nickel, 40)
+                    60f * 30f,
+                    ItemStack.with(DelivaricaItems.lustrite, 10, DelivaricaItems.nickel, 40)
                 )
             );
         }
@@ -449,13 +564,38 @@ public class DelivaricaBlocks {
             size = 3;
             consumePower(2.5f);
             consumeItems(ItemStack.with(
-                DelivaricaItems.tantalum, 30,
-                DelivaricaItems.nickel, 40
+                DelivaricaItems.sulfur, 30,
+                DelivaricaItems.nickel, 45
             ));
-            constructTime = 60f * 15f;
+            constructTime = 60f * 30f;
 
             upgrades.addAll(
                 new UnitType[]{DelivaricaUnits.photon, DelivaricaUnits.bunch}
+            );
+        }
+
+        @Override
+        public void load() {
+            super.load();
+            outRegion = arc.Core.atlas.find("delivarica-mod-unit-out");
+        }};
+
+        spiderReconstructor = new Reconstructor("spider-reconstructor") {{
+            requirements(Category.units, ItemStack.with(
+                DelivaricaItems.ramtanium, 40,
+                DelivaricaItems.nickel, 80,
+                DelivaricaItems.lustrite, 30
+            ));
+            size = 3;
+            consumePower(3f);
+            consumeItems(ItemStack.with(
+                DelivaricaItems.sulfur, 30,
+                DelivaricaItems.nickel, 45
+            ));
+            constructTime = 60f * 30f;
+
+            upgrades.addAll(
+                new UnitType[]{DelivaricaUnits.scrape, DelivaricaUnits.dent}
             );
         }
 
@@ -480,7 +620,6 @@ public class DelivaricaBlocks {
             ));
             constructTime = 60f * 25f;
 
-            // Использует собственные спрайты advanced-reconstructor-in / advanced-reconstructor-out | Uses its own in/out sprites
         }};
 
         // Энергетика | Power
@@ -571,6 +710,41 @@ public class DelivaricaBlocks {
             outputItem = new ItemStack(DelivaricaItems.lustrite, 1);
         }};
 
+        heavyCleaner = new RecipeCrafter("heavy-cleaner") {{
+            requirements(Category.crafting, ItemStack.with(
+                DelivaricaItems.chromium, 100,
+                DelivaricaItems.nickel, 80,
+                DelivaricaItems.ramtanium, 30
+            ));
+            size = 3;
+            health = 900;
+            hasPower = true;
+            hasLiquids = true;
+            liquidCapacity = 40f;
+            consumePower(1f);
+
+            // Список рецептов | Recipe list
+            recipes.add(
+                new CraftRecipe(
+                    ItemStack.with(DelivaricaItems.avritite, 3),
+                    new LiquidStack(DelivaricaLiquids.bromiumAcid, 10f / 60f),
+                    new ItemStack(DelivaricaItems.sulfur, 1),
+                    180f
+                )
+            );
+
+            craftEffect = Fx.pulverizeMedium;
+            updateEffect = Fx.none;
+
+            drawer = new DrawMulti(
+                new DrawRegion("-bottom"),
+                new DrawLiquidRegion(DelivaricaLiquids.bromiumAcid) {{
+                    suffix = "-liquid";
+                }},
+                new DrawDefault()
+            );
+        }};
+
         // Предметная логистика | Item distribution
         inertialJunction = new Junction("inertial-junction") {{
             requirements(Category.distribution, ItemStack.with(DelivaricaItems.chromium, 4));
@@ -615,6 +789,55 @@ public class DelivaricaBlocks {
             health = 90;
             speed = 1f;
             invert = true;
+        }};
+
+        liquidJunction = new LiquidJunction("liquid-junction") {{
+            requirements(Category.liquid, ItemStack.with(DelivaricaItems.chromium, 4));
+            health = 90;
+            solid = false;
+        }};
+
+        liquidRouter = new LiquidRouter("liquid-router") {{
+            requirements(Category.liquid, ItemStack.with(DelivaricaItems.chromium, 6));
+            size = 1;
+            health = 90;
+            liquidCapacity = 20f;
+            solid = false;
+        }};
+
+        liquidDuct = new Conduit("liquid-duct") {{
+            requirements(Category.liquid, ItemStack.with(DelivaricaItems.chromium, 2));
+            health = 90;
+            liquidCapacity = 16f;
+            liquidPressure = 1.05f;
+            leaks = false;
+            botColor = Color.valueOf("36363c");
+            junctionReplacement = liquidJunction;
+        }};
+
+
+        liquiTankOne = new LiquidRouter("liqui-tank-one") {{
+            requirements(Category.liquid, ItemStack.with(
+                DelivaricaItems.chromium, 30,
+                DelivaricaItems.nickel, 20
+            ));
+            size = 2;
+            health = 450;
+            liquidCapacity = 700f;
+            solid = true;
+        }};
+
+                basicPump = new Pump("basic-pump") {{
+            requirements(Category.liquid, ItemStack.with(
+                DelivaricaItems.chromium, 25,
+                DelivaricaItems.nickel, 15
+            ));
+            size = 2;
+            health = 240;
+            pumpAmount = 20f / 4f / 60f; 
+            liquidCapacity = 40f;
+            hasPower = true;
+            consumePower(0.5f);
         }};
 
         // Турели | Turrets
