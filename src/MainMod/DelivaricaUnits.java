@@ -1,15 +1,21 @@
 package MainMod;
 
+import MainMod.Units.Dent;
 import arc.Events;
 import arc.graphics.Color;
 import arc.math.Mathf;
+import arc.struct.Seq;
 import arc.util.Time;
+import mindustry.ai.UnitCommand;
 import mindustry.ai.types.BuilderAI;
+import mindustry.ai.types.CargoAI;
 import mindustry.ai.types.GroundAI;
 import mindustry.content.Fx;
+import mindustry.entities.Effect;
 import mindustry.entities.abilities.ForceFieldAbility;
 import mindustry.entities.bullet.ArtilleryBulletType;
 import mindustry.entities.bullet.BasicBulletType;
+import mindustry.entities.bullet.BombBulletType;
 import mindustry.entities.bullet.BulletType;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.gen.LegsUnit;
@@ -21,13 +27,19 @@ import mindustry.graphics.Layer;
 import mindustry.graphics.Pal;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
+import mindustry.gen.EntityMapping;
+
 
 public class DelivaricaUnits {
 
     // Юниты мода | Mod units
-    public static UnitType side, photon, photonArmored, bunch, bunchArmored, scrape;
+        // Юниты мода | Mod units
+    public static UnitType side, photon, photonArmored, bunch, bunchArmored, scrape, dent;
 
     public static void load() {
+
+        Dent.classId = EntityMapping.register("dent-legs-payload", Dent::new);
+
         // Юнит ядра | Core unit
         side = new UnitType("side") {{
             constructor = UnitEntity::create;
@@ -367,7 +379,7 @@ public class DelivaricaUnits {
             }});
         }};
 
-        // Скрейп | Scrape
+        // Скрейп (Т1 паук с круговой ударной волной) | Scrape (T1 spider with radial shockwave)
         scrape = new UnitType("scrape") {{
             constructor = LegsUnit::create;
             aiController = GroundAI::new;
@@ -380,14 +392,19 @@ public class DelivaricaUnits {
             rotateSpeed = 4.5f;
             outlineColor = Color.valueOf("36363c");
 
-            // Параметры паучьих лап | Spider leg parameters
-            legCount = 4;
-            legLength = 9f;
-            legForwardScl = 0.6f;
-            legMoveSpace = 1.4f;
+            legCount = 6;
+            legLength = 11f;
+            legLengthScl = 0.75f;
+            legBaseOffset = 2.2f;
+            legExtension = -1.5f;
+            legForwardScl = 0.65f;
+            legMoveSpace = 1.1f;
+            legSpeed = 0.25f;
+            legGroupSize = 3;
             hovering = true;
             allowLegStep = true;
             groundLayer = Layer.legUnit;
+
 
             // Встроенное оружие со слабой круговой ударной волной вокруг себя | Radial shockwave weapon
             weapons.add(new Weapon(name + "-w") {{
@@ -406,16 +423,114 @@ public class DelivaricaUnits {
                     hittable = false;
                     absorbable = false;
 
-                    // Слабая ударная волна вокруг корпуса | Weak radial shockwave around body
+                    // Увеличенный радиус ударной волны вокруг корпуса | Expanded radial shockwave around body
                     splashDamage = 18f;
-                    splashDamageRadius = 38f;
-                    knockback = 1.5f;
-                    hitEffect = Fx.shockwave;
+                    splashDamageRadius = 56f;
+                    knockback = 2.2f;
                     despawnEffect = Fx.none;
-                    hitColor = Color.valueOf("82fff2");
+
+                    // Кастомный многослойный эффект волны под цвет ядра паука | Custom multi-layered shockwave effect
+                    hitEffect = new Effect(28f, e -> {
+                        // Внешнее фиолетовое кольцо | Outer violet ring
+                        arc.graphics.g2d.Draw.color(Color.valueOf("a882ff"), Color.valueOf("5a4a9a"), e.fin());
+                        arc.graphics.g2d.Lines.stroke(2.8f * e.fout());
+                        arc.graphics.g2d.Lines.circle(e.x, e.y, 4f + 52f * e.finpow());
+
+                        // Внутреннее оранжевое кольцо энергии | Inner orange energy ring
+                        arc.graphics.g2d.Draw.color(Color.valueOf("ffb85c"), Color.valueOf("ff6e30"), e.fin());
+                        arc.graphics.g2d.Lines.stroke(1.6f * e.fout());
+                        arc.graphics.g2d.Lines.circle(e.x, e.y, 2f + 36f * e.fin());
+
+                        // Разлетающиеся радиальные искры | Radial energy sparks
+                        arc.graphics.g2d.Draw.color(Color.valueOf("e4d4ff"), Color.valueOf("ffb85c"), e.fin());
+                        arc.math.Angles.randLenVectors(e.id, 14, 6f + 50f * e.finpow(), (x, y) -> {
+                            arc.graphics.g2d.Lines.lineAngle(
+                                e.x + x,
+                                e.y + y,
+                                arc.math.Mathf.angle(x, y),
+                                4f * e.fout() + 1f
+                            );
+                        });
+                    });
                 }};
             }});
         }};
+
+        // Дент (Т2 паук-бомбардировщик и перевозчик грузов) | Dent (T2 spider bomber and payload carrier)
+        dent = new UnitType("dent") {{
+            constructor = Dent::new;
+            aiController = GroundAI::new;
+            defaultCommand = UnitCommand.moveCommand;
+            commands = Seq.with(
+                UnitCommand.moveCommand,
+                UnitCommand.enterPayloadCommand
+            );
+
+            flying = false;
+            speed = 0.68f;
+            hitSize = 14f;
+            health = 780f;
+            armor = 4f;
+            rotateSpeed = 4f;
+            outlineColor = Color.valueOf("36363c");
+
+            // Грузоподъёмность: постройки и юниты до 2x2 | Payload capacity up to 2x2
+            payloadCapacity = (2f * 8f) * (2f * 8f);
+            pickupUnits = true;
+
+            // Параметры паучьих лап (отображаются корректно) | Spider leg parameters (rendered properly)
+            legCount = 6;
+            legLength = 14f;
+            legBaseOffset = 3f;
+            legExtension = -1.5f;
+            legForwardScl = 0.65f;
+            legMoveSpace = 1.15f;
+            legSpeed = 0.22f;
+            legGroupSize = 3;
+            hovering = true;
+            allowLegStep = true;
+            groundLayer = Layer.legUnit;
+
+            // Бомбомёт: сбрасывает фиолетовую бомбу под себя раз в 2 секунды | Bomb dropper: drops purple bomb every 2s
+            weapons.add(new Weapon() {{
+                x = 0f;
+                y = 0f;
+                mirror = false;
+                reload = 120f;
+                shootCone = 360f;
+                shootSound = Sounds.explosionArtilleryShock;
+                ejectEffect = Fx.none;
+
+                bullet = new BombBulletType(0f, 80f) {{
+                    width = 11f;
+                    height = 11f;
+                    lifetime = 45f;
+                    spin = 4f;
+
+                    backColor = Color.valueOf("6e47c7");
+                    frontColor = Color.valueOf("d6b8ff");
+
+                    // Радиус 10 тайлов (80f) и урон: 140 в центре -> 14 на краю | 10-tile radius, 140 center -> 14 edge
+                    splashDamage = 140f;
+                    splashDamageRadius = 80f;
+                    scaledSplashDamage = true;
+                    splashDamagePierce = false;
+
+                    hitEffect = new Effect(32f, e -> {
+                        arc.graphics.g2d.Draw.color(Color.valueOf("b58aff"), Color.valueOf("5a36a8"), e.fin());
+                        arc.graphics.g2d.Lines.stroke(3f * e.fout());
+                        arc.graphics.g2d.Lines.circle(e.x, e.y, 6f + 74f * e.finpow());
+
+                        arc.graphics.g2d.Draw.color(Color.valueOf("ebd9ff"), Color.valueOf("8b5cf6"), e.fin());
+                        arc.math.Angles.randLenVectors(e.id, 18, 8f + 72f * e.finpow(), (x, y) -> {
+                            arc.graphics.g2d.Fill.circle(e.x + x, e.y + y, 3.5f * e.fout());
+                        });
+                    });
+                    despawnEffect = Fx.none;
+                }};
+            }});
+        }};
+
 
         // Наследование спрайтов для бронированных версий | Inherit sprites for armored variants
         Events.on(ClientLoadEvent.class, e -> {
