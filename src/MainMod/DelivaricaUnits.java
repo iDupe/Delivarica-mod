@@ -392,7 +392,7 @@ public class DelivaricaUnits {
             rotateSpeed = 4.5f;
             outlineColor = Color.valueOf("36363c");
 
-            legCount = 6;
+            legCount = 4;
             legLength = 11f;
             legLengthScl = 0.75f;
             legBaseOffset = 2.2f;

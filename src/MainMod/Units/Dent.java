@@ -49,7 +49,9 @@ public class Dent extends LegsUnit implements Payloadc {
     @Override
     public void draw() {
         super.draw();
+        arc.graphics.g2d.Draw.z(type.groundLayer - 0.5f);
         drawPayload();
+        arc.graphics.g2d.Draw.reset();
     }
 
     @Override
