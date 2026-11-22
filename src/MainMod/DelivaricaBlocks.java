@@ -1,7 +1,7 @@
 package MainMod;
 
 import MainMod.Blocks.RecipeCrafter;
-import MainMod.Blocks.RecipeCrafter.CraftRecipe;
+import mindustry.world.blocks.distribution.Sorter;
 import mindustry.type.LiquidStack;
 import mindustry.world.draw.DrawLiquidRegion;
 import MainMod.Blocks.xNode;
@@ -126,6 +126,7 @@ public class DelivaricaBlocks {
     public static BufferedItemBridge inertialBridge;
     public static OverflowGate inertialOverflowGate;
     public static OverflowGate inertialUnderflowGate;
+    public static Sorter inertialSorter, inertialInvertedSorter;
 
     // Жидкостная логистика | Liquid distribution
     public static LiquidRouter liquiTankOne, liquidRouter;
@@ -791,6 +792,18 @@ public class DelivaricaBlocks {
             invert = true;
         }};
 
+                inertialSorter = new Sorter("inertial-sorter") {{
+            requirements(Category.distribution, ItemStack.with(DelivaricaItems.chromium, 4));
+            health = 90;
+        }};
+
+        inertialInvertedSorter = new Sorter("inertial-asorter") {{
+            requirements(Category.distribution, ItemStack.with(DelivaricaItems.chromium, 4));
+            health = 90;
+            invert = true;
+        }};
+
+        // Жидкостная логистика | Liquid distribution
         liquidJunction = new LiquidJunction("liquid-junction") {{
             requirements(Category.liquid, ItemStack.with(DelivaricaItems.chromium, 4));
             health = 90;
